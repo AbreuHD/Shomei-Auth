@@ -4,7 +4,14 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-
+		<IsPackable>true</IsPackable>
+		<Authors>AbreuHD</Authors>
+		<Company>DoubleByte-Software</Company>
+		<PackageProjectUrl>https://github.com/DoubleByte-Software/Auth/</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/DoubleByte-Software/Auth/</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>auth, identity</PackageTags>	
   </PropertyGroup>
 
   <ItemGroup>
