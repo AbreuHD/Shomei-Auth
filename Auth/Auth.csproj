@@ -12,6 +12,7 @@
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<RepositoryUrl>https://github.com/DoubleByte-Software/Auth/</RepositoryUrl>
 	<RepositoryType>git</RepositoryType>
+	<PackageTags>auth, identity</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
