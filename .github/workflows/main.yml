@@ -69,5 +69,6 @@ jobs:
       - name: Publish NuGet package
         run: |
           foreach($file in (Get-ChildItem "${{ env.NuGetDirectory }}" -Recurse -Include *.nupkg)) {
-              dotnet nuget push -k "${{ secrets.NUGET_APIKEY }}" -s https://nuggets.doublebyte.org/v3/index.json .\Auth\bin\Release\Auth.1.0.0.nupkg--skip-duplicate
+              dotnet nuget push -k "${{ secrets.NUGET_APIKEY }}" -s https://nuggets.doublebyte.org/v3/index.json $file.FullName --skip-duplicate
           }
+
