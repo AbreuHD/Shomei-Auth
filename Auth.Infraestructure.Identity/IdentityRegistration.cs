@@ -1,6 +1,4 @@
-﻿using Auth.Core.Application.Interfaces.Services;
-using Auth.Core.Application.Services;
-using Auth.Core.Application.Settings;
+﻿using Auth.Core.Application.Settings;
 using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Services;
@@ -15,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using System.Text;
+using System.Reflection;
 
 namespace Auth.Infraestructure.Identity
 {
@@ -22,6 +21,7 @@ namespace Auth.Infraestructure.Identity
     {
         public static void AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
 
             services.AddDbContext<IdentityContext>(options =>
@@ -100,8 +100,8 @@ namespace Auth.Infraestructure.Identity
             });
 
 
-            services.AddTransient<IAccountService, AccountService>();
-            services.AddTransient<IUserService, UserService>();
+            //services.AddTransient<IAccountService, AccountService>();
+            //services.AddTransient<IUserService, UserService>();
         }
     }
 }

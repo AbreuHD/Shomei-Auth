@@ -36,7 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Auth.Core.Application\Auth.Core.Application.csproj" />
     <ProjectReference Include="..\Auth.Infraestructure.Identity\Auth.Infraestructure.Identity.csproj" />
   </ItemGroup>
 
