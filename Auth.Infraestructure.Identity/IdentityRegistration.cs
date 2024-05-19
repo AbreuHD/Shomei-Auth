@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
@@ -99,6 +100,7 @@ namespace Auth.Infraestructure.Identity
             });
             //services.AddSingleton<JWTSettings>();
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<MailSettings>>().Value);
 
             //services.AddTransient<IAccountService, AccountService>();
             //services.AddTransient<IUserService, UserService>();
