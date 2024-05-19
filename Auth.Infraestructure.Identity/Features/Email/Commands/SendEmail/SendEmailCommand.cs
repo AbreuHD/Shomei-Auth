@@ -1,4 +1,6 @@
 ﻿using Auth.Core.Application.Settings;
+using MailKit.Net.Imap;
+using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MediatR;
@@ -26,16 +28,16 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands.SendEmail
             {
                 MimeMessage email = new();
                 email.Sender = MailboxAddress.Parse($"{_mailSettings.DisplayName} <{_mailSettings.EmailFrom}>");
+                email.From.Add(new MailboxAddress(_mailSettings.DisplayName, _mailSettings.EmailFrom));
                 email.To.Add(MailboxAddress.Parse(request.To));
                 email.Subject = request.Subject;
                 BodyBuilder bodyBuilder = new();
                 bodyBuilder.HtmlBody = request.Body;
                 email.Body = bodyBuilder.ToMessageBody();
 
-
                 using SmtpClient smtp = new();
                 smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                smtp.Connect(_mailSettings.SmtpHost, _mailSettings.SmtpPort, SecureSocketOptions.StartTls, cancellationToken);
+                smtp.Connect(_mailSettings.SmtpHost, _mailSettings.SmtpPort, SecureSocketOptions.SslOnConnect, cancellationToken);
                 smtp.Authenticate(_mailSettings.SmtpUser, _mailSettings.SmtpPassword, cancellationToken);
                 await smtp.SendAsync(email);
                 smtp.Disconnect(true, cancellationToken);
