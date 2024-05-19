@@ -15,7 +15,7 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
     }
     public class CreateAccountCommandHandler : IRequestHandler<CreateAccountCommand, string>
     {
-        
+
     }
 
 }
