@@ -1,4 +1,5 @@
 ﻿using Auth.Core.Application.DTOs.Generic;
+using Auth.Infraestructure.Identity.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
@@ -19,9 +20,10 @@ namespace Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthE
 
     public class AuthEmailCommandHandler : IRequestHandler<AuthEmailCommand, GenericApiResponse<bool>>
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        
-        public AuthEmailCommandHandler(UserManager<IdentityUser> userManager)
+        private readonly UserManager<ApplicationUser> _userManager;
+
+
+        public AuthEmailCommandHandler(UserManager<ApplicationUser> userManager)
         {
             _userManager = userManager;
         }

@@ -2,6 +2,7 @@
 using Auth.Core.Application.Settings;
 using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.Entities;
+using Auth.Infraestructure.Identity.Seeds;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -21,8 +22,6 @@ namespace Auth.Infraestructure.Identity
     {
         public static void AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-
-
             services.AddDbContext<IdentityContext>(options =>
             {
                 options.EnableSensitiveDataLogging();
@@ -42,7 +41,7 @@ namespace Auth.Infraestructure.Identity
             //services.Configure<JWTSettings>(configuration.GetSection("JWTSettings"));
             services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
 
-            services.AddAuthentication(options =>
+            _ = services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -104,6 +103,23 @@ namespace Auth.Infraestructure.Identity
 
             //services.AddTransient<IAccountService, AccountService>();
             //services.AddTransient<IUserService, UserService>();
+        }
+
+        public static async Task AddIdentityRolesAsync(this IServiceProvider services)
+        {
+            try
+            {
+                var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+                await DefaultRoles.Seed(userManager, roleManager);
+                await DefaultOwner.Seed(userManager, roleManager);
+                await DefaultUser.Seed(userManager, roleManager);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
     }
 }
