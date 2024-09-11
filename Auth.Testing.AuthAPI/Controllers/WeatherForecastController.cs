@@ -1,4 +1,5 @@
 using Auth.Core.Application.Features.Login.Queries.AuthLogin;
+using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
 using Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -32,6 +33,13 @@ namespace Auth.Testing.AuthAPI.Controllers
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] CreateAccountCommand request)
+        {
+            var data = await Mediator.Send(request);
+            return Ok(data);
+        }
+
+        [HttpPost("ConfirmEmail")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] AuthEmailCommand request)
         {
             var data = await Mediator.Send(request);
             return Ok(data);
