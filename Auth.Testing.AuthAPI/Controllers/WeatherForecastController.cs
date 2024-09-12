@@ -1,6 +1,7 @@
 using Auth.Core.Application.Features.Login.Queries.AuthLogin;
 using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
 using Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount;
+using Auth.Infraestructure.Identity.Features.Register.Commands.SendValidationEmailAgain;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,11 +20,6 @@ namespace Auth.Testing.AuthAPI.Controllers
             _logger = logger;
         }
 
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
         [HttpPost("login")]
         public async Task<IActionResult> AuthLogin([FromBody] AuthLoginQuery request)
         {
@@ -40,6 +36,13 @@ namespace Auth.Testing.AuthAPI.Controllers
 
         [HttpPost("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail([FromQuery] AuthEmailCommand request)
+        {
+            var data = await Mediator.Send(request);
+            return Ok(data);
+        }
+
+        [HttpPost("ResentConfirmation")]
+        public async Task<IActionResult> ResentConfirmation([FromBody] SendValidationEmailAgainCommand request)
         {
             var data = await Mediator.Send(request);
             return Ok(data);
