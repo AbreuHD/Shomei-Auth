@@ -4,7 +4,23 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyName>Auth</AssemblyName>
+    <ApplicationIcon>ico.ico</ApplicationIcon>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Auth</Title>
+    <PackageIcon>ico.jpg</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/AbreuHD/Auth</RepositoryUrl>
+    <Authors>Jefferson Abreu Martinez [AbreuHD]</Authors>
+    <Company>AbreuHD</Company>
+    <Version>0.0.5</Version>
+    <Description>The easiest way to have Identity in your project
+</Description>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="ico.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MailKit" Version="4.6.0" />
@@ -31,6 +47,17 @@
   <ItemGroup>
     <Folder Include="Features\Email\Queries\" />
     <Folder Include="Features\ForgotPSW\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\ico.jpg">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
