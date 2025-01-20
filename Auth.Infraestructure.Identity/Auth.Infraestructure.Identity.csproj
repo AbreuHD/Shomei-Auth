@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/AbreuHD/Auth</RepositoryUrl>
     <Authors>Jefferson Abreu Martinez [AbreuHD]</Authors>
     <Company>AbreuHD</Company>
-    <Version>0.0.5</Version>
+    <Version>0.0.10</Version>
     <Description>The easiest way to have Identity in your project
 </Description>
   </PropertyGroup>
