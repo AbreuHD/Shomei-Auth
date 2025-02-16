@@ -76,3 +76,4 @@ _[Ss]cripts
 /.vs/Auth
 /.vs
 /ico.ico
+/Auth.Testing.AuthAPI/appsettings.json
