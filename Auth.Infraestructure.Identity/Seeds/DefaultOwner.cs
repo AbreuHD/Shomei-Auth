@@ -6,7 +6,7 @@ namespace Auth.Infraestructure.Identity.Seeds
 {
     public static class DefaultOwner
     {
-        public static async Task Seed(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public static async Task Seed(UserManager<ApplicationUser> userManager)
         {
             var user = new ApplicationUser
             {

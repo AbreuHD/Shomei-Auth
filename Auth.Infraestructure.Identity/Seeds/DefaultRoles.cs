@@ -6,7 +6,7 @@ namespace Auth.Infraestructure.Identity.Seeds
 {
     public static class DefaultRoles
     {
-        public static async Task Seed(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public static async Task Seed(RoleManager<IdentityRole> roleManager)
         {
             await roleManager.CreateAsync(new IdentityRole(Roles.Owner.ToString()));
             await roleManager.CreateAsync(new IdentityRole(Roles.Helper.ToString()));
