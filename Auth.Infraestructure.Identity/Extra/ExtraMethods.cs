@@ -42,7 +42,7 @@ namespace Auth.Infraestructure.Identity.Extra
             return verificationUrl;
         }
 
-        internal static JwtSecurityToken GenerateJWToken(ApplicationUser user, JWTSettings _jwtSettings, IList<Claim> userClaims, IList<string> roles, int? profileId)
+        internal static JwtSecurityToken GenerateJWToken(ApplicationUser user, JwtSettings _jwtSettings, IList<Claim> userClaims, IList<string> roles, int? profileId)
         {
             var roleClaims = new List<Claim>();
             foreach (var role in roles)
@@ -74,6 +74,7 @@ namespace Auth.Infraestructure.Identity.Extra
                 expires: DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes),
                 signingCredentials: signCredentials
             );
+
             return jwtSecurityToken;
         }
     }

@@ -4,10 +4,10 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>Auth</AssemblyName>
+    <AssemblyName>Shomei</AssemblyName>
     <ApplicationIcon>ico.ico</ApplicationIcon>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Title>Auth</Title>
+    <Title>Shōmei</Title>
     <PackageIcon>ico.jpg</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/AbreuHD/Auth</RepositoryUrl>

@@ -8,5 +8,6 @@ namespace Auth.Infraestructure.Identity.Entities
         public required string LastName { get; set; }
 
         public ICollection<UserProfile>? UserProfile { get; set; } = [];
+        public ICollection<UserSession> Sessions { get; set; } = [];
     }
 }

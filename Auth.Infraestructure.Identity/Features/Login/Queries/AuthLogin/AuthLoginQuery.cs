@@ -1,4 +1,5 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Account;
+﻿using Auth.Infraestructure.Identity.Context;
+using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
@@ -25,17 +26,19 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
         public required string Password { get; set; }
     }
 
-    public class AuthLoginQueryHandler(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
+    public class AuthLoginQueryHandler(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, IdentityContext identityContext)
         : IRequestHandler<AuthLoginQuery, GenericApiResponse<AuthenticationResponse>>
     {
+        private readonly IdentityContext _identityContext = identityContext;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
-        private readonly JWTSettings _jwtSettings
+        private readonly JwtSettings _jwtSettings
             = new()
             {
                 Audience = Environment.GetEnvironmentVariable("Audience") ?? configuration["JWTSettings:Audience"] ?? string.Empty,
                 Issuer = Environment.GetEnvironmentVariable("Issuer") ?? configuration["JWTSettings:Issuer"] ?? string.Empty,
                 Key = Environment.GetEnvironmentVariable("Key") ?? configuration["JWTSettings:Key"] ?? string.Empty,
+                UseDifferentProfiles = bool.Parse(Environment.GetEnvironmentVariable("UseDifferentProfiles") ?? configuration["JWTSettings:UseDifferentProfiles"] ?? "0"),
                 DurationInMinutes = int.Parse(Environment.GetEnvironmentVariable("DurationInMinutes") ?? configuration["JWTSettings:DurationInMinutes"] ?? "0")
             };
 
@@ -70,6 +73,20 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
             var roles = await _userManager.GetRolesAsync(User);
 
             JwtSecurityToken jwtSecurityToken = ExtraMethods.GenerateJWToken(User, _jwtSettings, userClaims, roles, null);
+            var token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+            if (!_jwtSettings.UseDifferentProfiles)
+            {
+                var session = new UserSession
+                {
+                    UserId = User.Id,
+                    Token = token,
+                    Expiration = jwtSecurityToken.ValidTo
+                };
+
+                _identityContext.Set<UserSession>().Add(session);
+                await _identityContext.SaveChangesAsync(cancellationToken);
+            }
+
             response.Payload = new AuthenticationResponse
             {
                 Id = User.Id,
@@ -78,7 +95,7 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
                 Email = User.Email,
                 IsVerified = User.EmailConfirmed,
                 Roles = [.. roles],
-                JWToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken),
+                JWToken = token,
                 RefreshToken = ExtraMethods.GenerateRefreshToken().Token
             };
 

@@ -33,11 +33,12 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
     {
         private readonly IdentityContext _identityContext = identityContext;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
-        private readonly JWTSettings _jwtSettings
+        private readonly JwtSettings _jwtSettings
             = new()
             {
                 Audience = Environment.GetEnvironmentVariable("Audience") ?? configuration["JWTSettings:Audience"] ?? string.Empty,
                 Issuer = Environment.GetEnvironmentVariable("Issuer") ?? configuration["JWTSettings:Issuer"] ?? string.Empty,
+                UseDifferentProfiles = bool.Parse(Environment.GetEnvironmentVariable("UseDifferentProfiles") ?? configuration["JWTSettings:UseDifferentProfiles"] ?? "0"),
                 Key = Environment.GetEnvironmentVariable("Key") ?? configuration["JWTSettings:Key"] ?? string.Empty,
                 DurationInMinutes = int.Parse(Environment.GetEnvironmentVariable("DurationInMinutes") ?? configuration["JWTSettings:DurationInMinutes"] ?? "0")
             };
@@ -78,6 +79,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
             var roles = await _userManager.GetRolesAsync(userResponse);
 
             JwtSecurityToken jwtSecurityToken = ExtraMethods.GenerateJWToken(userResponse, _jwtSettings, userClaims, roles, request.Profile);
+            var token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
             response.Payload = new AuthenticationResponse
             {
                 Id = userResponse.Id,
@@ -90,6 +92,18 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
                 RefreshToken = ExtraMethods.GenerateRefreshToken().Token
             };
 
+            if (_jwtSettings.UseDifferentProfiles)
+            {
+                var session = new UserSession
+                {
+                    UserId = userResponse.Id,
+                    Token = token,
+                    Expiration = jwtSecurityToken.ValidTo
+                };
+
+                _identityContext.Set<UserSession>().Add(session);
+                await _identityContext.SaveChangesAsync(cancellationToken);
+            }
             return response;
 
         }

@@ -1,4 +1,4 @@
-# Auth
+# Sh?mei
 ##### _The easiest way to have Identity in your project_
 
 ### Instalation

@@ -19,10 +19,16 @@ namespace Auth.Infraestructure.Identity.Context
             builder.Entity<UserProfile>(entity => entity.ToTable("UserProfile"));
 
             builder.Entity<UserProfile>()
-               .HasOne(p => p.User)
-               .WithMany(u => u.UserProfile)
-               .HasForeignKey(p => p.UserId)
-               .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(p => p.User)
+                .WithMany(u => u.UserProfile)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<UserSession>()
+                .HasOne(us => us.User)
+                .WithMany(u => u.Sessions)
+                .HasForeignKey(us => us.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
     }
