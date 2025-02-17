@@ -1,8 +1,8 @@
-﻿using Auth.Core.Application.DTOs.Account;
-using Auth.Core.Application.Settings;
-using Auth.Infraestructure.Identity.Context;
+﻿using Auth.Infraestructure.Identity.Context;
+using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Seeds;
+using Auth.Infraestructure.Identity.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -30,7 +30,9 @@ namespace Auth.Infraestructure.Identity
             });
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<IdentityContext>().AddDefaultTokenProviders();
+                .AddEntityFrameworkStores<IdentityContext>()
+                .AddDefaultTokenProviders();
+
 
             services.ConfigureApplicationCookie(option =>
             {
@@ -49,7 +51,8 @@ namespace Auth.Infraestructure.Identity
                     x.SmtpPassword = Environment.GetEnvironmentVariable("SmtpPassword");
                 });
             }
-            else {
+            else
+            {
                 services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
             }
 
@@ -120,9 +123,9 @@ namespace Auth.Infraestructure.Identity
                 var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
                 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-                await DefaultRoles.Seed(userManager, roleManager);
-                await DefaultOwner.Seed(userManager, roleManager);
-                await DefaultUser.Seed(userManager, roleManager);
+                await DefaultRoles.Seed(roleManager);
+                await DefaultOwner.Seed(userManager);
+                await DefaultUser.Seed(userManager);
             }
             catch (Exception ex)
             {

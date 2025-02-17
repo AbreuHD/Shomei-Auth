@@ -1,4 +1,4 @@
-﻿namespace Auth.Core.Application.DTOs.Account
+﻿namespace Auth.Infraestructure.Identity.DTOs.Account
 {
     public class JWTResponse
     {

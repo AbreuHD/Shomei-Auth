@@ -1,6 +1,4 @@
-﻿using Auth.Core.Application.Settings;
-using MailKit.Net.Imap;
-using MailKit;
+﻿using Auth.Infraestructure.Identity.Settings;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MediatR;

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Auth.Core.Application.DTOs.Account
+namespace Auth.Infraestructure.Identity.DTOs.Account
 {
     public class AuthenticationResponse
     {

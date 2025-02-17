@@ -1,4 +1,4 @@
-﻿namespace Auth.Core.Application.Settings
+﻿namespace Auth.Infraestructure.Identity.Settings
 {
     public class JWTSettings
     {

@@ -1,14 +1,9 @@
-﻿using Auth.Core.Application.DTOs.Generic;
+﻿using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail
 {
@@ -43,9 +38,9 @@ namespace Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthE
             }
 
             request.token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.token));
-            
+
             var result = await _userManager.ConfirmEmailAsync(user, request.token);
-            
+
             if (!result.Succeeded)
             {
                 response.Message = $"An error occurred while confirming {user.Email}";
@@ -54,7 +49,7 @@ namespace Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthE
                 response.Success = false;
                 return response;
             }
-            
+
             response.Success = true;
             response.Message = $"Account confirmed for {user.Email}. You can now use the App";
             response.Statuscode = 200;

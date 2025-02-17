@@ -1,7 +1,4 @@
 using Auth.Infraestructure.Identity;
-using Auth.Infraestructure.Identity.Entities;
-using Auth.Infraestructure.Identity.Seeds;
-using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 

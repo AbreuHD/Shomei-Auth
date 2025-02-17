@@ -9,14 +9,20 @@ namespace Auth.Infraestructure.Identity.Context
     {
         public IdentityContext(DbContextOptions<IdentityContext> option) : base(option) { }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(builder);
             //modelBuilder.HasDefaultSchema("Identity");
-            modelBuilder.Entity<ApplicationUser>(entity => entity.ToTable("Users"));
-            modelBuilder.Entity<IdentityRole>(entity => entity.ToTable("Roles"));
-            modelBuilder.Entity<IdentityUserRole<string>>(entity => entity.ToTable("UserRoles"));
+            builder.Entity<ApplicationUser>(entity => entity.ToTable("Users"));
+            builder.Entity<IdentityRole>(entity => entity.ToTable("Roles"));
+            builder.Entity<IdentityUserRole<string>>(entity => entity.ToTable("UserRoles"));
+            builder.Entity<UserProfile>(entity => entity.ToTable("UserProfile"));
 
+            builder.Entity<UserProfile>()
+               .HasOne(p => p.User)
+               .WithMany(u => u.UserProfile)
+               .HasForeignKey(p => p.UserId)
+               .OnDelete(DeleteBehavior.Cascade);
         }
 
     }

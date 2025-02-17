@@ -1,14 +1,14 @@
-﻿using Auth.Core.Application.Enums;
-using Auth.Infraestructure.Identity.Entities;
+﻿using Auth.Infraestructure.Identity.Entities;
+using Auth.Infraestructure.Identity.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace Auth.Infraestructure.Identity.Seeds
 {
     public static class DefaultUser
     {
-        public static async Task Seed(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public static async Task Seed(UserManager<ApplicationUser> userManager)
         {
-            ApplicationUser user = new ApplicationUser
+            ApplicationUser user = new()
             {
                 Name = "Jefferson",
                 LastName = "Abreu",

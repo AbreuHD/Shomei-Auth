@@ -3,6 +3,8 @@ pipeline {
     environment {
         NUGET_API_KEY = credentials('private_nuget_api_key')
         NUGET_SERVER_URL = credentials('private_nuget_uri')
+        SONARQUBE_EXCLUDE_FILES = "**/*.xml,**/*.json,**/*.html,**/*.css,**/*.js,**/Program.cs,**/Startup.cs,**/Migrations/**"
+        VERSION = "0.0.6"
     }
 
     stages {
@@ -17,7 +19,7 @@ pipeline {
                 script {
                     def scannerHome = tool 'SonarQ-DotNET8'
                     withSonarQubeEnv('SonarQ') {
-                        sh "dotnet ${scannerHome}/SonarScanner.MSBuild.dll begin /k:\"Auth\""
+                        sh "dotnet ${scannerHome}/SonarScanner.MSBuild.dll begin /k:\"Auth\" /v:${VERSION} /d:sonar.exclusions=${SONARQUBE_EXCLUDE_FILES}"
                         sh "dotnet build"
                         sh "dotnet ${scannerHome}/SonarScanner.MSBuild.dll end"
                     }
@@ -27,13 +29,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the project...'
-                sh 'dotnet build --configuration Release'
+                sh 'dotnet build --configuration Release -p:Version=${VERSION}'
             }
         }
         stage('Create NuGet package') {
             steps {
                 echo 'Packing the project...'
-                sh 'dotnet pack Auth.Infraestructure.Identity/Auth.Infraestructure.Identity.csproj --configuration Release --output ./nupkgs'
+                sh 'dotnet clean Auth.sln'
+                sh 'dotnet pack Auth.Infraestructure.Identity/Auth.Infraestructure.Identity.csproj --configuration Release -p:Version=${VERSION} --output ./nupkgs'
             }
         }
 
@@ -43,7 +46,8 @@ pipeline {
                 sh '''
                 dotnet nuget push ./nupkgs/*.nupkg \
                     --source $NUGET_SERVER_URL \
-                    --api-key $NUGET_API_KEY
+                    --api-key $NUGET_API_KEY \
+                    --skip-duplicate
                 '''
             }
         }

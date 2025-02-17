@@ -1,17 +1,15 @@
-﻿using Auth.Core.Application.DTOs.Account;
-using Auth.Core.Application.DTOs.Generic;
-using Auth.Core.Application.Settings;
+﻿using Auth.Infraestructure.Identity.DTOs.Account;
+using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
+using Auth.Infraestructure.Identity.Settings;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
-namespace Auth.Core.Application.Features.Login.Queries.AuthLogin
+
+namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
 {
     /// <summary>
     /// AuthLoginQuery Class, this class is used to login the user and generate a JWT Token for the user.
@@ -27,18 +25,18 @@ namespace Auth.Core.Application.Features.Login.Queries.AuthLogin
         public required string Password { get; set; }
     }
 
-    public class AuthLoginQueryHandler(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration) 
+    public class AuthLoginQueryHandler(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
         : IRequestHandler<AuthLoginQuery, GenericApiResponse<AuthenticationResponse>>
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
-        private readonly JWTSettings _jwtSettings 
-            = new JWTSettings() 
-            { 
-                Audience = Environment.GetEnvironmentVariable("Audience") ?? configuration["JWTSettings:Audience"],
-                Issuer = Environment.GetEnvironmentVariable("Issuer") ?? configuration["JWTSettings:Issuer"],
-                Key = Environment.GetEnvironmentVariable("Key") ?? configuration["JWTSettings:Key"],
-                DurationInMinutes = int.Parse(Environment.GetEnvironmentVariable("DurationInMinutes") ?? configuration["JWTSettings:DurationInMinutes"])
+        private readonly JWTSettings _jwtSettings
+            = new()
+            {
+                Audience = Environment.GetEnvironmentVariable("Audience") ?? configuration["JWTSettings:Audience"] ?? string.Empty,
+                Issuer = Environment.GetEnvironmentVariable("Issuer") ?? configuration["JWTSettings:Issuer"] ?? string.Empty,
+                Key = Environment.GetEnvironmentVariable("Key") ?? configuration["JWTSettings:Key"] ?? string.Empty,
+                DurationInMinutes = int.Parse(Environment.GetEnvironmentVariable("DurationInMinutes") ?? configuration["JWTSettings:DurationInMinutes"] ?? "0")
             };
 
         public async Task<GenericApiResponse<AuthenticationResponse>> Handle(AuthLoginQuery request, CancellationToken cancellationToken)
@@ -68,53 +66,25 @@ namespace Auth.Core.Application.Features.Login.Queries.AuthLogin
                 return response;
             }
 
-            JwtSecurityToken jwtSecurityToken = await GenerateJWToken(User);
-            response.Payload = new AuthenticationResponse();
-            response.Payload.Id = User.Id;
-            response.Payload.Name = User.Name;
-            response.Payload.LastName = User.LastName;
-            response.Payload.Email = User.Email;
-            response.Payload.IsVerified = User.EmailConfirmed;
-            var roles = await _userManager.GetRolesAsync(User).ConfigureAwait(false);
-            response.Payload.Roles = roles.ToList();
-            response.Payload.IsVerified = User.EmailConfirmed;
-            response.Payload.JWToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-            response.Payload.RefreshToken = ExtraMethods.GenerateRefreshToken().Token;
+            var userClaims = await _userManager.GetClaimsAsync(User);
+            var roles = await _userManager.GetRolesAsync(User);
+
+            JwtSecurityToken jwtSecurityToken = ExtraMethods.GenerateJWToken(User, _jwtSettings, userClaims, roles, null);
+            response.Payload = new AuthenticationResponse
+            {
+                Id = User.Id,
+                Name = User.Name,
+                LastName = User.LastName,
+                Email = User.Email,
+                IsVerified = User.EmailConfirmed,
+                Roles = [.. roles],
+                JWToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken),
+                RefreshToken = ExtraMethods.GenerateRefreshToken().Token
+            };
 
             return response;
         }
 
-        private async Task<JwtSecurityToken> GenerateJWToken(ApplicationUser user)
-        {
-            var userClaims = await _userManager.GetClaimsAsync(user);
-            var roles = await _userManager.GetRolesAsync(user);
-            var roleClaims = new List<Claim>();
-            foreach (var role in roles)
-            {
-                roleClaims.Add(new Claim("roles", role));
-            }
 
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("uid", user.Id)
-            }
-            .Union(userClaims)
-            .Union(roleClaims);
-
-            var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
-            var signCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
-            var jwtSecurityToken = new JwtSecurityToken
-            (
-                issuer: _jwtSettings.Issuer,
-                audience: _jwtSettings.Audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes),
-                signingCredentials: signCredentials
-            );
-            return jwtSecurityToken;
-        }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Auth.Core.Application.Enums
+﻿namespace Auth.Infraestructure.Identity.Enums
 {
     public enum Roles
     {
