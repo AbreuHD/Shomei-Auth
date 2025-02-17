@@ -36,7 +36,7 @@ pipeline {
             steps {
                 echo 'Packing the project...'
                 sh 'dotnet clean Auth.sln'
-                sh 'dotnet pack Auth.Infraestructure.Identity/Auth.Infraestructure.Identity.csproj --configuration Release --version-suffix=${VERSION} --output ./nupkgs'
+                sh 'dotnet pack Auth.Infraestructure.Identity/Auth.Infraestructure.Identity.csproj --configuration Release -p:Version=${VERSION} --output ./nupkgs'
             }
         }
 
@@ -47,7 +47,6 @@ pipeline {
                 dotnet nuget push ./nupkgs/*.nupkg \
                     --source $NUGET_SERVER_URL \
                     --api-key $NUGET_API_KEY
-                    --skip-duplicate
                 '''
             }
         }
