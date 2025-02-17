@@ -35,7 +35,8 @@ pipeline {
         stage('Create NuGet package') {
             steps {
                 echo 'Packing the project...'
-                sh 'dotnet pack Auth.Infraestructure.Identity/Auth.Infraestructure.Identity.csproj --configuration Release -p:Version=${VERSION} --output ./nupkgs'
+                sh 'dotnet clean Auth.sln'
+                sh 'dotnet pack Auth.Infraestructure.Identity/Auth.Infraestructure.Identity.csproj --configuration Release --version-suffix=${VERSION} --output ./nupkgs'
             }
         }
 
