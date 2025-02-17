@@ -46,7 +46,8 @@ pipeline {
                 sh '''
                 dotnet nuget push ./nupkgs/*.nupkg \
                     --source $NUGET_SERVER_URL \
-                    --api-key $NUGET_API_KEY
+                    --api-key $NUGET_API_KEY \
+                    --skip-duplicate
                 '''
             }
         }
