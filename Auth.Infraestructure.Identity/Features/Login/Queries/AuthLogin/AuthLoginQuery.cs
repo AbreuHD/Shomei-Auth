@@ -1,15 +1,15 @@
-﻿using Auth.Core.Application.DTOs.Account;
-using Auth.Core.Application.DTOs.Generic;
-using Auth.Core.Application.Settings;
+﻿using Auth.Infraestructure.Identity.DTOs.Account;
+using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
+using Auth.Infraestructure.Identity.Settings;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 
 
-namespace Auth.Core.Application.Features.Login.Queries.AuthLogin
+namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
 {
     /// <summary>
     /// AuthLoginQuery Class, this class is used to login the user and generate a JWT Token for the user.
@@ -25,7 +25,7 @@ namespace Auth.Core.Application.Features.Login.Queries.AuthLogin
         public required string Password { get; set; }
     }
 
-    public class AuthLoginQueryHandler(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration) 
+    public class AuthLoginQueryHandler(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
         : IRequestHandler<AuthLoginQuery, GenericApiResponse<AuthenticationResponse>>
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;

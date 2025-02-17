@@ -1,5 +1,5 @@
-﻿using Auth.Core.Application.DTOs.Generic;
-using Auth.Infraestructure.Identity.Context;
+﻿using Auth.Infraestructure.Identity.Context;
+using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.DTOs.Profiles;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -19,7 +19,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
         {
             var response = new GenericApiResponse<List<GetProfilesResponse>>();
             var profiles = await _identityContext.Set<Entities.UserProfile>().Where(x => x.UserId == request.UserId).ToListAsync();
-            if(profiles.Count == 0)
+            if (profiles.Count == 0)
             {
                 response.Success = false;
                 response.Message = "No profiles found";

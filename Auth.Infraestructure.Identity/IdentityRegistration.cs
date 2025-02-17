@@ -1,8 +1,8 @@
-﻿using Auth.Core.Application.DTOs.Account;
-using Auth.Core.Application.Settings;
-using Auth.Infraestructure.Identity.Context;
+﻿using Auth.Infraestructure.Identity.Context;
+using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Seeds;
+using Auth.Infraestructure.Identity.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -51,7 +51,8 @@ namespace Auth.Infraestructure.Identity
                     x.SmtpPassword = Environment.GetEnvironmentVariable("SmtpPassword");
                 });
             }
-            else {
+            else
+            {
                 services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
             }
 

@@ -1,10 +1,10 @@
-﻿using Auth.Core.Application.DTOs.Generic;
-using Auth.Core.Application.Enums;
+﻿using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
+using Auth.Infraestructure.Identity.Enums;
+using Auth.Infraestructure.Identity.Extra;
 using Auth.Infraestructure.Identity.Features.Email.Commands.SendEmail;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Auth.Infraestructure.Identity.Extra;
 
 namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
 {
@@ -41,7 +41,7 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
             var response = new GenericApiResponse<string>();
 
             var UserNameExist = await _userManager.FindByNameAsync(request.UserName);
-            
+
             if (UserNameExist != null)
             {
                 response.Success = false;
@@ -85,7 +85,7 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
 
             var verificationUrl = await ExtraMethods.SendVerificationEMailUrl(user, request.ORIGIN, _userManager);
 
-            await Mediator.Send(new SendEmailCommand 
+            await Mediator.Send(new SendEmailCommand
             {
                 To = user.Email,
                 Body = $"Please confirm your account visiting this URL {verificationUrl}",

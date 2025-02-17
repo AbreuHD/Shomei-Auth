@@ -1,21 +1,15 @@
-﻿using Auth.Core.Application.DTOs.Account;
-using Auth.Core.Application.DTOs.Generic;
-using Auth.Core.Application.Enums;
-using Auth.Core.Application.Settings;
-using Auth.Infraestructure.Identity.Context;
+﻿using Auth.Infraestructure.Identity.Context;
+using Auth.Infraestructure.Identity.DTOs.Account;
+using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
+using Auth.Infraestructure.Identity.Settings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
 {
@@ -36,7 +30,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
     public class SelectProfileQueryHandler(UserManager<ApplicationUser> userManager,
         IConfiguration configuration,
         IdentityContext identityContext) : IRequestHandler<SelectProfileQuery, GenericApiResponse<AuthenticationResponse>>
-        {
+    {
         private readonly IdentityContext _identityContext = identityContext;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly JWTSettings _jwtSettings
@@ -61,7 +55,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
                     Statuscode = StatusCodes.Status500InternalServerError
                 };
             }
-            if(profileResponse.UserId != request.UserId)
+            if (profileResponse.UserId != request.UserId)
             {
                 return new GenericApiResponse<AuthenticationResponse>
                 {

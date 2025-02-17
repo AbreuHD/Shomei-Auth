@@ -1,9 +1,7 @@
-﻿using Auth.Core.Application.DTOs.Generic;
-using Auth.Infraestructure.Identity.Context;
+﻿using Auth.Infraestructure.Identity.Context;
+using Auth.Infraestructure.Identity.DTOs.Generic;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using System.Net;
 using System.Text.Json.Serialization;
 
 namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands

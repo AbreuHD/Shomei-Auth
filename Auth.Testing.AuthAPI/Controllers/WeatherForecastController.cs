@@ -1,10 +1,10 @@
-using Auth.Core.Application.Features.Login.Queries.AuthLogin;
 using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
+using Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin;
 using Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount;
 using Auth.Infraestructure.Identity.Features.Register.Commands.SendValidationEmailAgain;
 using Auth.Infraestructure.Identity.Features.UserProfile.Commands;
 using Auth.Infraestructure.Identity.Features.UserProfile.Queries;
-using Auth.Testing.AuthAPI.Middleware;
+using Auth.Infraestructure.Identity.Middleware;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -65,7 +65,7 @@ namespace Auth.Testing.AuthAPI.Controllers
         public async Task<IActionResult> SelectProfile([FromBody] SelectProfileQuery request)
         {
             var userId = User.FindFirst("uid")!.Value;
-            request.UserId = userId; 
+            request.UserId = userId;
             var data = await Mediator.Send(request);
             return Ok(data);
         }

@@ -1,5 +1,4 @@
-﻿using Auth.Core.Application.Enums;
-using Auth.Infraestructure.Identity.Entities;
+﻿using Auth.Infraestructure.Identity.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace Auth.Infraestructure.Identity.Seeds

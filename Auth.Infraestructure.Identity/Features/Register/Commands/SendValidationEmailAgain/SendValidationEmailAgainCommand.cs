@@ -1,8 +1,7 @@
-﻿using Auth.Core.Application.DTOs.Generic;
+﻿using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
 using Auth.Infraestructure.Identity.Features.Email.Commands.SendEmail;
-using Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 

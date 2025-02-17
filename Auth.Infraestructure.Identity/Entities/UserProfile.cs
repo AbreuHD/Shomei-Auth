@@ -8,7 +8,7 @@ namespace Auth.Infraestructure.Identity.Entities
         public required string Name { get; set; }
         public string? AvatarUrl { get; set; }
         public required string UserId { get; set; }
-        
+
         [ForeignKey("UserId")]
         public ApplicationUser? User { get; set; }
     }

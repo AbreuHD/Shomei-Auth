@@ -1,8 +1,7 @@
-﻿using Auth.Core.Application.DTOs.Generic;
-using Auth.Infraestructure.Identity.Context;
+﻿using Auth.Infraestructure.Identity.Context;
+using Auth.Infraestructure.Identity.DTOs.Generic;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using System.Net;
 using System.Text.Json.Serialization;
 
 namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
@@ -24,7 +23,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
         {
             try
             {
-                var UserProfile = await _context.Set<Entities.UserProfile>().FindAsync([request.Id], cancellationToken: cancellationToken) 
+                var UserProfile = await _context.Set<Entities.UserProfile>().FindAsync([request.Id], cancellationToken: cancellationToken)
                     ?? throw new NotImplementedException("This profile don't exist");
 
                 if (UserProfile.UserId != request.UserId)

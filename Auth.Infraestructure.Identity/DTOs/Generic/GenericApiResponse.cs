@@ -1,4 +1,4 @@
-﻿namespace Auth.Core.Application.DTOs.Generic
+﻿namespace Auth.Infraestructure.Identity.DTOs.Generic
 {
     public class GenericApiResponse<DTO>
     {

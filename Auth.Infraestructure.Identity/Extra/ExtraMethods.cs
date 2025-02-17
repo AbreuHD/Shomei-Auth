@@ -1,11 +1,10 @@
-﻿using Auth.Core.Application.DTOs.Account;
-using Auth.Core.Application.Settings;
+﻿using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.Entities;
+using Auth.Infraestructure.Identity.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
