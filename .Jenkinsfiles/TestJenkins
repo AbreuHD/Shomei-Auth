@@ -29,7 +29,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the project...'
-                sh 'dotnet build --configuration Release'
+                sh 'dotnet build --configuration Release -p:Version=${VERSION}'
             }
         }
         stage('Create NuGet package') {
@@ -47,6 +47,7 @@ pipeline {
                 dotnet nuget push ./nupkgs/*.nupkg \
                     --source $NUGET_SERVER_URL \
                     --api-key $NUGET_API_KEY
+                    --skip-duplicate
                 '''
             }
         }
