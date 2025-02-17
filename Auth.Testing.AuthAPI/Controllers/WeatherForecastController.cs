@@ -2,7 +2,11 @@ using Auth.Core.Application.Features.Login.Queries.AuthLogin;
 using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
 using Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount;
 using Auth.Infraestructure.Identity.Features.Register.Commands.SendValidationEmailAgain;
+using Auth.Infraestructure.Identity.Features.UserProfile.Commands;
+using Auth.Infraestructure.Identity.Features.UserProfile.Queries;
+using Auth.Testing.AuthAPI.Middleware;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Auth.Testing.AuthAPI.Controllers
@@ -44,6 +48,63 @@ namespace Auth.Testing.AuthAPI.Controllers
         [HttpPost("ResentConfirmation")]
         public async Task<IActionResult> ResentConfirmation([FromBody] SendValidationEmailAgainCommand request)
         {
+            var data = await Mediator.Send(request);
+            return Ok(data);
+        }
+
+        [HttpPost("TestMiddleware")]
+        [ClaimRequired("ProfileId", "You need select a profile")]
+        public async Task<IActionResult> TestMiddleware()
+        {
+            var rng = new Random().Next();
+            return Ok(rng);
+        }
+
+        [HttpPost("SelectProfile")]
+        [Authorize]
+        public async Task<IActionResult> SelectProfile([FromBody] SelectProfileQuery request)
+        {
+            var userId = User.FindFirst("uid")!.Value;
+            request.UserId = userId; 
+            var data = await Mediator.Send(request);
+            return Ok(data);
+        }
+
+        [HttpPost("GetAllProfiles")]
+        [Authorize]
+        public async Task<IActionResult> GetAllProfiles()
+        {
+            var userId = User.FindFirst("uid")!.Value;
+            var data = await Mediator.Send(new GetProfilesQuery { UserId = userId });
+            return Ok(data);
+        }
+
+        [HttpPost("CreateUserProfileCommand")]
+        [Authorize]
+        public async Task<IActionResult> CreateUserProfileCommand(CreateUserProfileCommand request)
+        {
+            var userId = User.FindFirst("uid")!.Value;
+            request.UserId = userId;
+            var data = await Mediator.Send(request);
+            return Ok(data);
+        }
+
+        [HttpPost("DeleteUserProfileCommand")]
+        [Authorize]
+        public async Task<IActionResult> DeleteUserProfileCommand(int Id)
+        {
+            var userId = User.FindFirst("uid")!.Value;
+            var request = new DeleteUserProfileCommand() { Id = Id, UserId = userId };
+            var data = await Mediator.Send(request);
+            return Ok(data);
+        }
+
+        [HttpPost("EditUserProfileCommand")]
+        [Authorize]
+        public async Task<IActionResult> EditUserProfileCommand(EditUserProfileCommand request)
+        {
+            var userId = User.FindFirst("uid")!.Value;
+            request.UserId = userId;
             var data = await Mediator.Send(request);
             return Ok(data);
         }
