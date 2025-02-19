@@ -12,33 +12,33 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands.SendEmail
         public required string Subject { get; set; }
         public required string Body { get; set; }
     }
-    public class SendEmailCommandHandler : IRequestHandler<SendEmailCommand, bool>
+    internal class SendEmailCommandHandler(MailSettings mailSettings) : IRequestHandler<SendEmailCommand, bool>
     {
-        private MailSettings _mailSettings { get; }
-        public SendEmailCommandHandler(MailSettings mailSettings)
-        {
-            _mailSettings = mailSettings;
-        }
+        private MailSettings MailSettings { get; } = mailSettings;
 
         public async Task<bool> Handle(SendEmailCommand request, CancellationToken cancellationToken)
         {
             try
             {
-                MimeMessage email = new();
-                email.Sender = MailboxAddress.Parse($"{_mailSettings.DisplayName} <{_mailSettings.EmailFrom}>");
-                email.From.Add(new MailboxAddress(_mailSettings.DisplayName, _mailSettings.EmailFrom));
+                MimeMessage email = new()
+                {
+                    Sender = MailboxAddress.Parse($"{MailSettings.DisplayName} <{MailSettings.EmailFrom}>")
+                };
+                email.From.Add(new MailboxAddress(MailSettings.DisplayName, MailSettings.EmailFrom));
                 email.To.Add(MailboxAddress.Parse(request.To));
                 email.Subject = request.Subject;
-                BodyBuilder bodyBuilder = new();
-                bodyBuilder.HtmlBody = request.Body;
+                BodyBuilder bodyBuilder = new()
+                {
+                    HtmlBody = request.Body
+                };
                 email.Body = bodyBuilder.ToMessageBody();
 
                 using SmtpClient smtp = new();
                 smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                smtp.Connect(_mailSettings.SmtpHost, _mailSettings.SmtpPort, SecureSocketOptions.SslOnConnect, cancellationToken);
-                smtp.Authenticate(_mailSettings.SmtpUser, _mailSettings.SmtpPassword, cancellationToken);
+                await smtp.ConnectAsync(MailSettings.SmtpHost, MailSettings.SmtpPort, SecureSocketOptions.SslOnConnect, cancellationToken);
+                await smtp.AuthenticateAsync(MailSettings.SmtpUser, MailSettings.SmtpPassword, cancellationToken);
                 await smtp.SendAsync(email);
-                smtp.Disconnect(true, cancellationToken);
+                await smtp.DisconnectAsync(true, cancellationToken);
                 return true;
 
             }

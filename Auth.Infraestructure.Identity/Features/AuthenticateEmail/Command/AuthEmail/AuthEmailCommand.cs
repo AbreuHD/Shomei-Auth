@@ -14,7 +14,7 @@ namespace Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthE
         public required ConfirmEmailRequestDto Dto { get; set; }
     }
 
-    public class AuthEmailCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<AuthEmailCommand, GenericApiResponse<string>>
+    internal class AuthEmailCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<AuthEmailCommand, GenericApiResponse<string>>
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
 

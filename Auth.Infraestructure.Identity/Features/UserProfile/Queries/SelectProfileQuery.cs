@@ -29,7 +29,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
         public required string UserAgent { get; set; }
         public required string IpAdress { get; set; }
     }
-    public class SelectProfileQueryHandler(UserManager<ApplicationUser> userManager,
+    internal class SelectProfileQueryHandler(UserManager<ApplicationUser> userManager,
         IConfiguration configuration,
         IdentityContext identityContext) : IRequestHandler<SelectProfileQuery, GenericApiResponse<AuthenticationResponse>>
     {
