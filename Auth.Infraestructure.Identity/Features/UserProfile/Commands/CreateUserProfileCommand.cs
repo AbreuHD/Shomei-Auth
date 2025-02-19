@@ -1,5 +1,6 @@
 ﻿using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.DTOs.Generic;
+using Auth.Infraestructure.Identity.DTOs.PublicDtos;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json.Serialization;
@@ -8,12 +9,10 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
 {
     public class CreateUserProfileCommand : IRequest<GenericApiResponse<bool>>
     {
-        [JsonIgnore]
-        public string? UserId { get; set; }
-        public required string Name { get; set; }
-        public string? AvatarUrl { get; set; }
+        public required CreateUserProfileRequestDto Dto { get; set; }
+        public required string UserId { get; set; }
     }
-    public class CreateUserProfileCommandHandler(IdentityContext context) : IRequestHandler<CreateUserProfileCommand, GenericApiResponse<bool>>
+    internal class CreateUserProfileCommandHandler(IdentityContext context) : IRequestHandler<CreateUserProfileCommand, GenericApiResponse<bool>>
     {
         private readonly IdentityContext _context = context;
 
@@ -21,7 +20,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
         {
             try
             {
-                var profile = new Entities.UserProfile { UserId = request.UserId, Name = request.Name, AvatarUrl = request.AvatarUrl };
+                var profile = new Entities.UserProfile { UserId = request.UserId, Name = request.Dto.Name, AvatarUrl = request.Dto.AvatarUrl };
                 await _context.Set<Entities.UserProfile>().AddAsync(profile, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
                 return new GenericApiResponse<bool> { Success = true, Message = "Profile Added Sucessfully", Statuscode = StatusCodes.Status200OK, Payload = true };

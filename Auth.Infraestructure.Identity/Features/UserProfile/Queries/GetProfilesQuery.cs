@@ -12,7 +12,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
         public required string UserId { get; set; }
     }
 
-    public class GetProfilesQueryHandler(IdentityContext identityContext) : IRequestHandler<GetProfilesQuery, GenericApiResponse<List<GetProfilesResponse>>>
+    internal class GetProfilesQueryHandler(IdentityContext identityContext) : IRequestHandler<GetProfilesQuery, GenericApiResponse<List<GetProfilesResponse>>>
     {
         private readonly IdentityContext _identityContext = identityContext;
         public async Task<GenericApiResponse<List<GetProfilesResponse>>> Handle(GetProfilesQuery request, CancellationToken cancellationToken)

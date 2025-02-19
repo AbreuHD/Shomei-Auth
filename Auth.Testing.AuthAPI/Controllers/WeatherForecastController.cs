@@ -1,3 +1,5 @@
+using Auth.Infraestructure.Identity.DTOs.Account;
+using Auth.Infraestructure.Identity.DTOs.PublicDtos;
 using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
 using Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin;
 using Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount;
@@ -8,48 +10,63 @@ using Auth.Infraestructure.Identity.Middleware;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Asn1.Ocsp;
+using System.Net;
 
 namespace Auth.Testing.AuthAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class WeatherForecastController(IMediator mediator) : ControllerBase
     {
-        public IMediator Mediator { get; }
-        private readonly ILogger<WeatherForecastController> _logger;
+        public IMediator Mediator { get; } = mediator;
 
-        public WeatherForecastController(IMediator mediator, ILogger<WeatherForecastController> logger)
+        [HttpGet("Login")]
+        public async Task<IActionResult> AuthLogin([FromBody] LoginRequestDto requestDto)
         {
-            Mediator = mediator;
-            _logger = logger;
+            var request = new AuthLoginQuery
+            {
+                Dto = requestDto,
+                UserAgent = Request.Headers.UserAgent.ToString(),
+                IpAdress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown"
+            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> AuthLogin([FromBody] AuthLoginQuery request)
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register([FromBody] RegisterAccountRequestDto requestDto)
         {
-            var data = await Mediator.Send(request);
-            return Ok(data);
+            var request = new CreateAccountCommand
+            {
+                Dto = requestDto,
+                ORIGIN = Request.Headers.Origin.ToString() ?? "Unknown"
+            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] CreateAccountCommand request)
+        [HttpGet("ConfirmEmail")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailRequestDto requestDto)
         {
-            var data = await Mediator.Send(request);
-            return Ok(data);
-        }
-
-        [HttpPost("ConfirmEmail")]
-        public async Task<IActionResult> ConfirmEmail([FromQuery] AuthEmailCommand request)
-        {
-            var data = await Mediator.Send(request);
-            return Ok(data);
+            var request = new AuthEmailCommand
+            {
+                Dto = requestDto
+            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
         }
 
         [HttpPost("ResentConfirmation")]
-        public async Task<IActionResult> ResentConfirmation([FromBody] SendValidationEmailAgainCommand request)
+        public async Task<IActionResult> ResentConfirmation([FromBody] SendValidationEmailAgainRequestDto requestDto)
         {
-            var data = await Mediator.Send(request);
-            return Ok(data);
+            var request = new SendValidationEmailAgainCommand
+            {
+                Dto = requestDto,
+                Origin = Request.Headers.Origin.ToString() ?? "Unknown"
+            };
+            var response = await Mediator.Send(request);
+            return Ok(response);
         }
 
         [HttpPost("TestMiddleware")]
@@ -62,51 +79,60 @@ namespace Auth.Testing.AuthAPI.Controllers
 
         [HttpPost("SelectProfile")]
         [Authorize]
-        public async Task<IActionResult> SelectProfile([FromBody] SelectProfileQuery request)
+        public async Task<IActionResult> SelectProfile([FromBody] SelectProfileRequestDto requestDto)
         {
-            var userId = User.FindFirst("uid")!.Value;
-            request.UserId = userId;
-            var data = await Mediator.Send(request);
-            return Ok(data);
+            var request = new SelectProfileQuery
+            {
+                Dto = requestDto,
+                UserAgent = Request.Headers.UserAgent.ToString(),
+                IpAdress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
+                UserId = User.FindFirst("uid")!.Value
+            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
         }
 
-        [HttpPost("GetAllProfiles")]
+        [HttpGet("GetAllProfiles")]
         [Authorize]
         public async Task<IActionResult> GetAllProfiles()
         {
-            var userId = User.FindFirst("uid")!.Value;
-            var data = await Mediator.Send(new GetProfilesQuery { UserId = userId });
-            return Ok(data);
+            var response = await Mediator.Send(new GetProfilesQuery { UserId = User.FindFirst("uid")!.Value });
+            return StatusCode(response.Statuscode, response);
         }
 
         [HttpPost("CreateUserProfileCommand")]
         [Authorize]
-        public async Task<IActionResult> CreateUserProfileCommand(CreateUserProfileCommand request)
+        public async Task<IActionResult> CreateUserProfileCommand(CreateUserProfileRequestDto requestDto)
         {
-            var userId = User.FindFirst("uid")!.Value;
-            request.UserId = userId;
-            var data = await Mediator.Send(request);
-            return Ok(data);
+            var request = new CreateUserProfileCommand()
+            {
+                Dto = requestDto,
+                UserId = User.FindFirst("uid")!.Value
+            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
         }
 
-        [HttpPost("DeleteUserProfileCommand")]
+        [HttpDelete("DeleteUserProfileCommand")]
         [Authorize]
         public async Task<IActionResult> DeleteUserProfileCommand(int Id)
         {
-            var userId = User.FindFirst("uid")!.Value;
-            var request = new DeleteUserProfileCommand() { Id = Id, UserId = userId };
-            var data = await Mediator.Send(request);
-            return Ok(data);
+            var request = new DeleteUserProfileCommand() { Id = Id, UserId = User.FindFirst("uid")!.Value };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
         }
 
-        [HttpPost("EditUserProfileCommand")]
+        [HttpPut("EditUserProfileCommand")]
         [Authorize]
-        public async Task<IActionResult> EditUserProfileCommand(EditUserProfileCommand request)
+        public async Task<IActionResult> EditUserProfileCommand(EditUserProfileRequestDto requestDto)
         {
-            var userId = User.FindFirst("uid")!.Value;
-            request.UserId = userId;
-            var data = await Mediator.Send(request);
-            return Ok(data);
+            var request = new EditUserProfileCommand()
+            {
+                Dto = requestDto,
+                UserId = User.FindFirst("uid")!.Value,
+            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
         }
     }
 }
