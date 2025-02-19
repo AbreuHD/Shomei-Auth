@@ -13,7 +13,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
         public required string UserId { get; set; }
     }
 
-    public class EditUserProfileCommandHandler(IdentityContext context) : IRequestHandler<EditUserProfileCommand, GenericApiResponse<bool>>
+    internal class EditUserProfileCommandHandler(IdentityContext context) : IRequestHandler<EditUserProfileCommand, GenericApiResponse<bool>>
     {
         private readonly IdentityContext _context = context;
 

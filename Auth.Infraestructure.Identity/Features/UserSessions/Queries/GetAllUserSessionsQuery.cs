@@ -12,7 +12,7 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Queries
     {
         public required string UserId { get; set; }
     }
-    public class GetAllUserSessionsQueryHandler(IdentityContext identityContext) : IRequestHandler<GetAllUserSessionsQuery, GenericApiResponse<List<UserSessionResponse>>>
+    internal class GetAllUserSessionsQueryHandler(IdentityContext identityContext) : IRequestHandler<GetAllUserSessionsQuery, GenericApiResponse<List<UserSessionResponse>>>
     {
         private readonly IdentityContext _identityContext = identityContext;
 

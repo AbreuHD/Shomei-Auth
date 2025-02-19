@@ -11,7 +11,7 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
     {
         public required string Token { get; set; }
     }
-    sealed class LogoutCurrentSessionCommandHandler(IdentityContext identityContext) : IRequestHandler<LogoutCurrentSessionCommand, GenericApiResponse<bool>>
+    internal class LogoutCurrentSessionCommandHandler(IdentityContext identityContext) : IRequestHandler<LogoutCurrentSessionCommand, GenericApiResponse<bool>>
     {
         private readonly IdentityContext _identityContext = identityContext;
 
