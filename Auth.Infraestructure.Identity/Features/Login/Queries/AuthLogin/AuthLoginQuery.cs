@@ -1,10 +1,12 @@
 ﻿using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.DTOs.Generic;
+using Auth.Infraestructure.Identity.DTOs.PublicDtos;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
 using Auth.Infraestructure.Identity.Settings;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
@@ -15,18 +17,20 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
     /// <summary>
     /// AuthLoginQuery Class, this class is used to login the user and generate a JWT Token for the user.
     /// </summary>
-    /// <param UserName="UserName">
-    /// <param Password="Password">
+    /// <param LoginRequestDto="LoginRequestDto">
+    /// <param UserAgent="UserAgent">
+    /// <param IpAdress="IpAdress">
     /// <returns>
     /// <see cref="GenericApiResponse<AuthenticationResponse>"/>
     /// </returns>
     public class AuthLoginQuery : IRequest<GenericApiResponse<AuthenticationResponse>>
     {
-        public required string UserName { get; set; }
-        public required string Password { get; set; }
+        public required LoginRequestDto Dto { get; set; }
+        public required string UserAgent { get; set; }
+        public required string IpAdress { get; set; }
     }
 
-    public class AuthLoginQueryHandler(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, IdentityContext identityContext)
+    internal class AuthLoginQueryHandler(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, IdentityContext identityContext)
         : IRequestHandler<AuthLoginQuery, GenericApiResponse<AuthenticationResponse>>
     {
         private readonly IdentityContext _identityContext = identityContext;
@@ -45,63 +49,72 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
         public async Task<GenericApiResponse<AuthenticationResponse>> Handle(AuthLoginQuery request, CancellationToken cancellationToken)
         {
             var response = new GenericApiResponse<AuthenticationResponse>();
-            var User = await _userManager.FindByNameAsync(request.UserName);
-            if (User == null)
+            try
             {
-                response.Success = false;
-                response.Message = $"No Account Register with {request.UserName}";
-                response.Statuscode = 402;
-                return response;
-            }
-            var result = await _signInManager.PasswordSignInAsync(User.UserName, request.Password, false, lockoutOnFailure: false);
-            if (!result.Succeeded)
-            {
-                response.Success = false;
-                response.Message = $"Invalid Password";
-                response.Statuscode = 409;
-                return response;
-            }
-            if (!User.EmailConfirmed)
-            {
-                response.Success = false;
-                response.Message = $"Account not confirm for {request.UserName}";
-                response.Statuscode = 400;
-                return response;
-            }
-
-            var userClaims = await _userManager.GetClaimsAsync(User);
-            var roles = await _userManager.GetRolesAsync(User);
-
-            JwtSecurityToken jwtSecurityToken = ExtraMethods.GenerateJWToken(User, _jwtSettings, userClaims, roles, null);
-            var token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-            if (!_jwtSettings.UseDifferentProfiles)
-            {
-                var session = new UserSession
+                var User = await _userManager.FindByNameAsync(request.Dto.UserName);
+                if (User == null)
                 {
-                    UserId = User.Id,
-                    Token = token,
-                    Expiration = jwtSecurityToken.ValidTo
+                    response.Success = false;
+                    response.Message = $"No Account Register with {request.Dto.UserName}";
+                    response.Statuscode = StatusCodes.Status404NotFound;
+                    return response;
+                }
+                var result = await _signInManager.PasswordSignInAsync(User.UserName!, request.Dto.Password, false, lockoutOnFailure: false);
+                if (!result.Succeeded)
+                {
+                    response.Success = false;
+                    response.Message = $"Invalid Password";
+                    response.Statuscode = StatusCodes.Status409Conflict;
+                    return response;
+                }
+                if (!User.EmailConfirmed)
+                {
+                    response.Success = false;
+                    response.Message = $"Account not confirm for {request.Dto.UserName}";
+                    response.Statuscode = StatusCodes.Status400BadRequest;
+                    return response;
+                }
+
+                var userClaims = await _userManager.GetClaimsAsync(User);
+                var roles = await _userManager.GetRolesAsync(User);
+
+                JwtSecurityToken jwtSecurityToken = ExtraMethods.GenerateJWToken(User, _jwtSettings, userClaims, roles, null);
+                var token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+                if (!_jwtSettings.UseDifferentProfiles)
+                {
+                    var session = new UserSession
+                    {
+                        UserId = User.Id,
+                        Token = token,
+                        Expiration = jwtSecurityToken.ValidTo,
+                        IpAddress = request.IpAdress,
+                        UserAgent = request.UserAgent,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    _identityContext.Set<UserSession>().Add(session);
+                    await _identityContext.SaveChangesAsync(cancellationToken);
+                }
+
+                response.Payload = new AuthenticationResponse
+                {
+                    Id = User.Id,
+                    Name = User.Name,
+                    LastName = User.LastName,
+                    Email = User.Email!,
+                    IsVerified = User.EmailConfirmed,
+                    Roles = [.. roles],
+                    JWToken = token,
+                    RefreshToken = ExtraMethods.GenerateRefreshToken().Token
                 };
-
-                _identityContext.Set<UserSession>().Add(session);
-                await _identityContext.SaveChangesAsync(cancellationToken);
-            }
-
-            response.Payload = new AuthenticationResponse
+            }catch (Exception ex)
             {
-                Id = User.Id,
-                Name = User.Name,
-                LastName = User.LastName,
-                Email = User.Email,
-                IsVerified = User.EmailConfirmed,
-                Roles = [.. roles],
-                JWToken = token,
-                RefreshToken = ExtraMethods.GenerateRefreshToken().Token
-            };
-
+                response.Success = false;
+                response.Message = ex.Message;
+                response.Statuscode = StatusCodes.Status500InternalServerError;
+                response.Payload = new();
+            }
             return response;
         }
-
-
     }
 }
