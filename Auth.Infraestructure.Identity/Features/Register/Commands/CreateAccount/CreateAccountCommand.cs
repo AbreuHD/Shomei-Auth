@@ -82,7 +82,8 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
                     Body = $"Please confirm your account visiting this URL {verificationUrl}",
                     Subject = "Confirm registration"
                 }, cancellationToken);
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = ex.Message;

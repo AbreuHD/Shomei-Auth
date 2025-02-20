@@ -107,7 +107,8 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
                     JWToken = token,
                     RefreshToken = ExtraMethods.GenerateRefreshToken().Token
                 };
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = ex.Message;

@@ -18,7 +18,7 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
         public async Task<GenericApiResponse<bool>> Handle(LogoutCurrentSessionCommand request, CancellationToken cancellationToken)
         {
             var identityResponse = await _identityContext.Set<Entities.UserSession>().FirstOrDefaultAsync(x => x.Token == request.Token, cancellationToken);
-            if(identityResponse == null)
+            if (identityResponse == null)
             {
                 return new GenericApiResponse<bool>
                 {

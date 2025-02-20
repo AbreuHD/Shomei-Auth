@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
-using System.Text.Json.Serialization;
 
 namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
 {

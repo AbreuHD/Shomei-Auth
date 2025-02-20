@@ -3,7 +3,6 @@ using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using System.Text.Json.Serialization;
 
 namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
 {

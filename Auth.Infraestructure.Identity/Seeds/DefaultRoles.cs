@@ -6,7 +6,7 @@ namespace Auth.Infraestructure.Identity.Seeds
     {
         public static async Task Seed(RoleManager<IdentityRole> roleManager, IEnumerable<string> roles)
         {
-            if(roles.Contains("Owner"))
+            if (roles.Contains("Owner"))
             {
                 roles = roles.Append("Owner");
             }
