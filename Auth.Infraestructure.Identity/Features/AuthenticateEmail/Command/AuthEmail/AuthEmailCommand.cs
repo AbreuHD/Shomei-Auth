@@ -1,5 +1,5 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.DTOs.PublicDtos;
+﻿using Auth.Infraestructure.Identity.DTOs.Account;
+using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;

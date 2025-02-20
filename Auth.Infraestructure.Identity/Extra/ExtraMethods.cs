@@ -11,7 +11,7 @@ using System.Text;
 
 namespace Auth.Infraestructure.Identity.Extra
 {
-    public class ExtraMethods
+    public static class ExtraMethods
     {
         public static string RandomTokenString()
         {
@@ -51,12 +51,12 @@ namespace Auth.Infraestructure.Identity.Extra
             }
 
             var claims = new List<Claim>
-               {
-                   new(JwtRegisteredClaimNames.Sub, user.UserName),
-                   new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                   new(JwtRegisteredClaimNames.Email, user.Email),
-                   new("uid", user.Id),
-               }
+                   {
+                       new(JwtRegisteredClaimNames.Sub, user.UserName!),
+                       new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                       new(JwtRegisteredClaimNames.Email, user.Email!),
+                       new("uid", user.Id),
+                   }
             .Union(userClaims)
             .Union(roleClaims)
             .ToList();

@@ -1,17 +1,22 @@
-﻿using Auth.Infraestructure.Identity.Enums;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace Auth.Infraestructure.Identity.Seeds
 {
     public static class DefaultRoles
     {
-        public static async Task Seed(RoleManager<IdentityRole> roleManager)
+        public static async Task Seed(RoleManager<IdentityRole> roleManager, IEnumerable<string> roles)
         {
-            await roleManager.CreateAsync(new IdentityRole(Roles.Owner.ToString()));
-            await roleManager.CreateAsync(new IdentityRole(Roles.Helper.ToString()));
-            await roleManager.CreateAsync(new IdentityRole(Roles.Admin.ToString()));
-            await roleManager.CreateAsync(new IdentityRole(Roles.Helper.ToString()));
-            await roleManager.CreateAsync(new IdentityRole(Roles.User.ToString()));
+            if(roles.Contains("Owner"))
+            {
+                roles = roles.Append("Owner");
+            }
+            foreach (var roleName in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(roleName))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                }
+            }
         }
     }
 }

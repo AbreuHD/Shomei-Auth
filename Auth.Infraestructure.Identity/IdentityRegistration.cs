@@ -1,5 +1,5 @@
 ﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Account;
+using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Seeds;
 using Auth.Infraestructure.Identity.Settings;
@@ -41,14 +41,14 @@ namespace Auth.Infraestructure.Identity
             });
             if (Environment.GetEnvironmentVariable("SmtpPassword") != null)
             {
-                _ = services.Configure<MailSettings>(x =>
+                services.Configure<MailSettings>(x =>
                 {
-                    x.EmailFrom = Environment.GetEnvironmentVariable("EmailFrom");
-                    x.SmtpHost = Environment.GetEnvironmentVariable("SmtpHost");
-                    x.SmtpPort = int.Parse(Environment.GetEnvironmentVariable("SmtpPort"));
-                    x.DisplayName = Environment.GetEnvironmentVariable("DisplayName");
-                    x.SmtpUser = Environment.GetEnvironmentVariable("SmtpUser");
-                    x.SmtpPassword = Environment.GetEnvironmentVariable("SmtpPassword");
+                    x.EmailFrom = Environment.GetEnvironmentVariable("EmailFrom") ?? string.Empty;
+                    x.SmtpHost = Environment.GetEnvironmentVariable("SmtpHost") ?? string.Empty;
+                    x.SmtpPort = int.Parse(Environment.GetEnvironmentVariable("SmtpPort") ?? string.Empty);
+                    x.DisplayName = Environment.GetEnvironmentVariable("DisplayName") ?? string.Empty;
+                    x.SmtpUser = Environment.GetEnvironmentVariable("SmtpUser") ?? string.Empty;
+                    x.SmtpPassword = Environment.GetEnvironmentVariable("SmtpPassword") ?? string.Empty;
                 });
             }
             else
@@ -80,32 +80,32 @@ namespace Auth.Infraestructure.Identity
                     OnAuthenticationFailed = c =>
                     {
                         c.NoResult();
-                        c.Response.StatusCode = 500;
+                        c.Response.StatusCode = StatusCodes.Status500InternalServerError;
                         c.Response.ContentType = "text/plain";
                         return c.Response.WriteAsync(c.Exception.ToString());
                     },
                     OnChallenge = c =>
                     {
                         c.HandleResponse();
-                        c.Response.StatusCode = 401;
+                        c.Response.StatusCode = StatusCodes.Status401Unauthorized;
                         c.Response.ContentType = "application/json";
-                        var result = JsonConvert.SerializeObject(new JWTResponse
+                        var result = JsonConvert.SerializeObject(new GenericApiResponse<bool>
                         {
                             Message = "You're Not Authorized",
                             Success = false,
-                            Statuscode = 401
+                            Statuscode = StatusCodes.Status401Unauthorized
                         });
                         return c.Response.WriteAsync(result);
                     },
                     OnForbidden = c =>
                     {
-                        c.Response.StatusCode = 404;
+                        c.Response.StatusCode = StatusCodes.Status404NotFound;
                         c.Response.ContentType = "application/json";
-                        var result = JsonConvert.SerializeObject(new JWTResponse
+                        var result = JsonConvert.SerializeObject(new GenericApiResponse<bool>
                         {
                             Message = "You're Not Authorized to access to this resource",
                             Success = false,
-                            Statuscode = 404
+                            Statuscode = StatusCodes.Status404NotFound,
                         });
                         return c.Response.WriteAsync(result);
                     }
@@ -116,16 +116,15 @@ namespace Auth.Infraestructure.Identity
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<MailSettings>>().Value);
         }
 
-        public static async Task AddIdentityRolesAsync(this IServiceProvider services)
+        public static async Task AddIdentityRolesAsync(this IServiceProvider services, IEnumerable<string> roles)
         {
             try
             {
                 var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
                 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-                await DefaultRoles.Seed(roleManager);
+                await DefaultRoles.Seed(roleManager, roles);
                 await DefaultOwner.Seed(userManager);
-                await DefaultUser.Seed(userManager);
             }
             catch (Exception ex)
             {

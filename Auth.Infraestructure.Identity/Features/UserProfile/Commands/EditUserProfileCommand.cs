@@ -1,6 +1,6 @@
 ﻿using Auth.Infraestructure.Identity.Context;
+using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.DTOs.PublicDtos;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json.Serialization;

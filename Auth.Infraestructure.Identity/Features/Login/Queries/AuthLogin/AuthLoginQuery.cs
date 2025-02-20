@@ -1,7 +1,6 @@
 ﻿using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.DTOs.PublicDtos;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
 using Auth.Infraestructure.Identity.Settings;
@@ -100,6 +99,7 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
                 {
                     Id = User.Id,
                     Name = User.Name,
+                    UserName = User.UserName!,
                     LastName = User.LastName,
                     Email = User.Email!,
                     IsVerified = User.EmailConfirmed,
@@ -112,7 +112,6 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
                 response.Success = false;
                 response.Message = ex.Message;
                 response.Statuscode = StatusCodes.Status500InternalServerError;
-                response.Payload = new();
             }
             return response;
         }

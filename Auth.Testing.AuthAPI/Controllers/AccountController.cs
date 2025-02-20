@@ -1,5 +1,4 @@
 using Auth.Infraestructure.Identity.DTOs.Account;
-using Auth.Infraestructure.Identity.DTOs.PublicDtos;
 using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
 using Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin;
 using Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount;
@@ -7,17 +6,16 @@ using Auth.Infraestructure.Identity.Features.Register.Commands.SendValidationEma
 using Auth.Infraestructure.Identity.Features.UserProfile.Commands;
 using Auth.Infraestructure.Identity.Features.UserProfile.Queries;
 using Auth.Infraestructure.Identity.Middleware;
+using Auth.Testing.AuthAPI.ExtraConfig.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Org.BouncyCastle.Asn1.Ocsp;
-using System.Net;
 
 namespace Auth.Testing.AuthAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController(IMediator mediator) : ControllerBase
+    public class AccountController(IMediator mediator) : ControllerBase
     {
         public IMediator Mediator { get; } = mediator;
 
@@ -37,7 +35,7 @@ namespace Auth.Testing.AuthAPI.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterAccountRequestDto requestDto)
         {
-            var request = new CreateAccountCommand
+            var request = new CreateAccountCommand(Roles.User.ToString())
             {
                 Dto = requestDto,
                 ORIGIN = Request.Headers.Origin.ToString() ?? "Unknown"

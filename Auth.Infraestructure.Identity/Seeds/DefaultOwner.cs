@@ -1,5 +1,4 @@
 ﻿using Auth.Infraestructure.Identity.Entities;
-using Auth.Infraestructure.Identity.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace Auth.Infraestructure.Identity.Seeds
@@ -10,11 +9,10 @@ namespace Auth.Infraestructure.Identity.Seeds
         {
             var user = new ApplicationUser
             {
-                Name = "Jefferson",
-                LastName = "Abreu",
-                UserName = "AbreuHD",
-                Email = "AbrueMartinezJefferson@gmail.com",
-                PhoneNumber = "809-491-0570",
+                Name = "John",
+                LastName = "Doe",
+                UserName = "Owner",
+                Email = "John@Doe.com",
                 EmailConfirmed = true
             };
             if (userManager.Users.All(u => u.Id != user.Id))
@@ -23,7 +21,7 @@ namespace Auth.Infraestructure.Identity.Seeds
                 if (userEmail == null)
                 {
                     await userManager.CreateAsync(user, "123Pa$$word!");
-                    await userManager.AddToRoleAsync(user, Roles.Owner.ToString());
+                    await userManager.AddToRoleAsync(user, "Owner");
                 }
             }
         }

@@ -1,4 +1,6 @@
 using Auth.Infraestructure.Identity;
+using Auth.Testing.AuthAPI.Extensions;
+using Auth.Testing.AuthAPI.ExtraConfig.Enums;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication(); //Add this line
 builder.Services.AddIdentityInfrastructure(builder.Configuration); //Add this line
-
+builder.Services.AddSwaggerExtension(); //Swagger Extension
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -18,7 +20,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    await services.AddIdentityRolesAsync();
+    await services.AddIdentityRolesAsync(Enum.GetNames<Roles>());
 } // Add this block
 
 if (app.Environment.IsDevelopment())

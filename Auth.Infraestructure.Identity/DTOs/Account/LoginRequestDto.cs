@@ -1,4 +1,4 @@
-﻿namespace Auth.Infraestructure.Identity.DTOs.PublicDtos
+﻿namespace Auth.Infraestructure.Identity.DTOs.Account
 {
     public class LoginRequestDto
     {
