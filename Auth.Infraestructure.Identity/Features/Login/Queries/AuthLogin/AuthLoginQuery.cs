@@ -47,7 +47,25 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
 
         public async Task<GenericApiResponse<AuthenticationResponse>> Handle(AuthLoginQuery request, CancellationToken cancellationToken)
         {
-            var response = new GenericApiResponse<AuthenticationResponse>();
+            var response = new GenericApiResponse<AuthenticationResponse>()
+            {
+                Message = "Logged",
+                Statuscode = StatusCodes.Status200OK,
+                Success = true,
+                Payload = new AuthenticationResponse()
+                {
+                    Id = string.Empty,
+                    Name = string.Empty,
+                    LastName = string.Empty,
+                    UserName = string.Empty,
+                    Email = string.Empty,
+                    Roles = [],
+                    IsVerified = false,
+                    JWToken = string.Empty,
+                    RefreshToken = string.Empty,
+                }
+            };
+
             try
             {
                 var User = await _userManager.FindByNameAsync(request.Dto.UserName);

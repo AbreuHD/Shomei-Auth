@@ -28,7 +28,7 @@ namespace Auth.Infraestructure.Identity.Middleware
                 try
                 {
                     var jwtToken = tokenHandler.ReadJwtToken(token);
-                    var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                    var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "uid")?.Value;
 
                     if (userId == null)
                     {

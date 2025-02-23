@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
 {
-    class LogoutAllSessionsCommand : IRequest<GenericApiResponse<bool>>
+    public class LogoutAllSessionsCommand : IRequest<GenericApiResponse<bool>>
     {
         public required string UserId { get; set; }
     }

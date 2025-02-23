@@ -15,6 +15,6 @@ namespace Auth.Infraestructure.Identity.DTOs.Account
 
         public required string JWToken { get; set; }
         [JsonIgnore]
-        public required string RefreshToken { get; set; }
+        public string? RefreshToken { get; set; }
     }
 }
