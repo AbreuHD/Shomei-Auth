@@ -7,6 +7,8 @@
         public required string Token { get; set; }
         public required string IpAddress { get; set; }
         public required string UserAgent { get; set; }
+        public required string Country { get; set; }
+        public required string City { get; set; }
         public required DateTime CreatedAt { get; set; }
     }
 }

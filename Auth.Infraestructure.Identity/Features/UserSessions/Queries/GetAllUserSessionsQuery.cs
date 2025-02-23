@@ -2,6 +2,7 @@
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.DTOs.Sessions;
 using Auth.Infraestructure.Identity.Entities;
+using Auth.Infraestructure.Identity.Extra;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -12,9 +13,10 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Queries
     {
         public required string UserId { get; set; }
     }
-    internal class GetAllUserSessionsQueryHandler(IdentityContext identityContext) : IRequestHandler<GetAllUserSessionsQuery, GenericApiResponse<List<UserSessionResponse>>>
+    internal class GetAllUserSessionsQueryHandler(IdentityContext identityContext, IHttpClientFactory httpClientFactory) : IRequestHandler<GetAllUserSessionsQuery, GenericApiResponse<List<UserSessionResponse>>>
     {
         private readonly IdentityContext _identityContext = identityContext;
+        private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
         public async Task<GenericApiResponse<List<UserSessionResponse>>> Handle(GetAllUserSessionsQuery request, CancellationToken cancellationToken)
         {
@@ -30,8 +32,21 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Queries
                         IpAddress = x.IpAddress,
                         UserAgent = x.UserAgent,
                         CreatedAt = x.CreatedAt,
+                        Country = "",
+                        City = ""
                     })
                     .ToListAsync(cancellationToken);
+
+                foreach (var session in userSessions)
+                {
+                    var geoInfo = await ExtraMethods.GetGeoLocationInfo(session.IpAddress, _httpClientFactory);
+                    if (geoInfo != null)
+                    {
+                        session.Country = geoInfo.Country;
+                        session.City = geoInfo.City;
+                    }
+                }
+
                 return new GenericApiResponse<List<UserSessionResponse>>
                 {
                     Message = "User sessions retrieved successfully",
@@ -52,5 +67,7 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Queries
 
             }
         }
+
+
     }
 }

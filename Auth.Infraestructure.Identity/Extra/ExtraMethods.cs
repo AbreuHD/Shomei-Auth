@@ -1,9 +1,11 @@
 ﻿using Auth.Infraestructure.Identity.DTOs.Account;
+using Auth.Infraestructure.Identity.DTOs.Geolocation;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -13,6 +15,28 @@ namespace Auth.Infraestructure.Identity.Extra
 {
     public static class ExtraMethods
     {
+        internal static async Task<GeoLocationInfoDto?> GetGeoLocationInfo(string ipAddress, IHttpClientFactory _httpClientFactory)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                var response = await client.GetStringAsync($"https://ip.guide/{ipAddress}");
+
+                if (!string.IsNullOrEmpty(response))
+                {
+                    var geoInfo = JsonConvert.DeserializeObject<LocationInfoDto>(response);
+                    return geoInfo?.Location;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Manejo de errores si la solicitud falla
+                Console.WriteLine($"Error al obtener información de geolocalización: {ex.Message}");
+            }
+
+            return null;
+        }
+
         public static bool ValidateToken(string token, string storedHash)
         {
             var hashInput = HashToken(token);
