@@ -77,25 +77,40 @@ namespace Auth.Infraestructure.Identity
                 };
                 options.Events = new JwtBearerEvents()
                 {
-                    OnAuthenticationFailed = c =>
+                    OnAuthenticationFailed = async c =>
                     {
-                        c.NoResult();
-                        c.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                        c.Response.ContentType = "text/plain";
-                        return c.Response.WriteAsync(c.Exception.ToString());
-                    },
-                    OnChallenge = c =>
-                    {
-                        c.HandleResponse();
-                        c.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                        c.Response.ContentType = "application/json";
-                        var result = JsonConvert.SerializeObject(new GenericApiResponse<bool>
+                        if (!c.Response.HasStarted)
                         {
-                            Message = "You're Not Authorized",
-                            Success = false,
-                            Statuscode = StatusCodes.Status401Unauthorized
-                        });
-                        return c.Response.WriteAsync(result);
+                            c.NoResult();
+                            c.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            c.Response.ContentType = "application/json";
+
+                            var result = JsonConvert.SerializeObject(new GenericApiResponse<bool>
+                            {
+                                Message = "Your token is expired or it's not valid",
+                                Success = false,
+                                Statuscode = StatusCodes.Status401Unauthorized,
+                            });
+                            await c.Response.WriteAsync(result);
+                            c.Response.CompleteAsync().Wait();
+                        }
+                    },
+                    OnChallenge = async c =>
+                    {
+                        if (!c.Response.HasStarted)
+                        {
+                            c.HandleResponse();
+                            c.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            c.Response.ContentType = "application/json";
+                            var result = JsonConvert.SerializeObject(new GenericApiResponse<bool>
+                            {
+                                Message = "You're Not Authorized",
+                                Success = false,
+                                Statuscode = StatusCodes.Status401Unauthorized
+                            });
+                            await c.Response.WriteAsync(result);
+                            c.Response.CompleteAsync().Wait();
+                        }
                     },
                     OnForbidden = c =>
                     {

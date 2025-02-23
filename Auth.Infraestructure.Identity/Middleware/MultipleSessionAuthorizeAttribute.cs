@@ -1,10 +1,12 @@
 ﻿using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.Entities;
+using Auth.Infraestructure.Identity.Extra;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Threading;
 
 namespace Auth.Infraestructure.Identity.Middleware
 {
@@ -36,11 +38,17 @@ namespace Auth.Infraestructure.Identity.Middleware
                     }
                     else
                     {
+                        var tokenHased = ExtraMethods.HashToken(token);
                         var session = await dbContext.Set<UserSession>()
-                            .FirstOrDefaultAsync(s => s.Token == token && s.UserId == userId);
+                            .FirstOrDefaultAsync(s => s.Token == tokenHased && s.UserId == userId);
 
                         if (session == null || session.Expiration < DateTime.UtcNow)
                         {
+                            if (session != null)
+                            {
+                                dbContext.Set<UserSession>().Remove(session);
+                                await dbContext.SaveChangesAsync();
+                            }
                             context.Result = new UnauthorizedResult();
                         }
                     }

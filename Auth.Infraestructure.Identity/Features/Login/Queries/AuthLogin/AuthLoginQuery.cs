@@ -102,7 +102,7 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
                     var session = new UserSession
                     {
                         UserId = User.Id,
-                        Token = token,
+                        Token = ExtraMethods.HashToken(token),
                         Expiration = jwtSecurityToken.ValidTo,
                         IpAddress = request.IpAdress,
                         UserAgent = request.UserAgent,

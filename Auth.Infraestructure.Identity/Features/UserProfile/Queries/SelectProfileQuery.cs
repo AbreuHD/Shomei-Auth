@@ -98,7 +98,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
                 var session = new UserSession
                 {
                     UserId = userResponse.Id,
-                    Token = token,
+                    Token = ExtraMethods.HashToken(token),
                     Expiration = jwtSecurityToken.ValidTo,
                     CreatedAt = DateTime.UtcNow,
                     IpAddress = request.IpAdress,

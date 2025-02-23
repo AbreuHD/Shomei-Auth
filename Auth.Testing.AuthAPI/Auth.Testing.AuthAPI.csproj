@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Title>Authentication Service</Title>
     <Authors>AbreuHD</Authors>
-    <Company>DoubleByte</Company>
+    <Company>AbreuHD</Company>
     <PackageProjectUrl>https://github.com/DoubleByte-Software/Auth</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/DoubleByte-Software/Auth</RepositoryUrl>

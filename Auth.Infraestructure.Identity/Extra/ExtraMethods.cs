@@ -13,6 +13,19 @@ namespace Auth.Infraestructure.Identity.Extra
 {
     public static class ExtraMethods
     {
+        public static bool ValidateToken(string token, string storedHash)
+        {
+            var hashInput = HashToken(token);
+            return hashInput == storedHash;
+        }
+
+        public static string HashToken(string token)
+        {
+            var bytes = Encoding.UTF8.GetBytes(token);
+            var hash = SHA256.HashData(bytes);
+            return Convert.ToBase64String(hash);
+        }
+
         public static string RandomTokenString()
         {
             var randomBytes = new byte[40];
