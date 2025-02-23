@@ -1,27 +1,28 @@
 using Auth.Infraestructure.Identity.DTOs.Account;
-using Auth.Infraestructure.Identity.DTOs.PublicDtos;
 using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
 using Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin;
 using Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount;
 using Auth.Infraestructure.Identity.Features.Register.Commands.SendValidationEmailAgain;
 using Auth.Infraestructure.Identity.Features.UserProfile.Commands;
 using Auth.Infraestructure.Identity.Features.UserProfile.Queries;
+using Auth.Infraestructure.Identity.Features.UserSessions.Commands;
+using Auth.Infraestructure.Identity.Features.UserSessions.Queries;
 using Auth.Infraestructure.Identity.Middleware;
+using Auth.Testing.AuthAPI.ExtraConfig.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Org.BouncyCastle.Asn1.Ocsp;
-using System.Net;
+using Newtonsoft.Json.Linq;
 
 namespace Auth.Testing.AuthAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController(IMediator mediator) : ControllerBase
+    public class AccountController(IMediator mediator) : ControllerBase
     {
         public IMediator Mediator { get; } = mediator;
 
-        [HttpGet("Login")]
+        [HttpPost("Login")]
         public async Task<IActionResult> AuthLogin([FromBody] LoginRequestDto requestDto)
         {
             var request = new AuthLoginQuery
@@ -37,7 +38,7 @@ namespace Auth.Testing.AuthAPI.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterAccountRequestDto requestDto)
         {
-            var request = new CreateAccountCommand
+            var request = new CreateAccountCommand(Roles.User.ToString())
             {
                 Dto = requestDto,
                 ORIGIN = Request.Headers.Origin.ToString() ?? "Unknown"
@@ -70,6 +71,7 @@ namespace Auth.Testing.AuthAPI.Controllers
         }
 
         [HttpPost("TestMiddleware")]
+        [MultipleSessionAuthorize]
         [ClaimRequired("ProfileId", "You need select a profile")]
         public async Task<IActionResult> TestMiddleware()
         {
@@ -102,7 +104,7 @@ namespace Auth.Testing.AuthAPI.Controllers
 
         [HttpPost("CreateUserProfileCommand")]
         [Authorize]
-        public async Task<IActionResult> CreateUserProfileCommand(CreateUserProfileRequestDto requestDto)
+        public async Task<IActionResult> CreateUserProfile(CreateUserProfileRequestDto requestDto)
         {
             var request = new CreateUserProfileCommand()
             {
@@ -115,7 +117,7 @@ namespace Auth.Testing.AuthAPI.Controllers
 
         [HttpDelete("DeleteUserProfileCommand")]
         [Authorize]
-        public async Task<IActionResult> DeleteUserProfileCommand(int Id)
+        public async Task<IActionResult> DeleteUserProfile(int Id)
         {
             var request = new DeleteUserProfileCommand() { Id = Id, UserId = User.FindFirst("uid")!.Value };
             var response = await Mediator.Send(request);
@@ -124,11 +126,55 @@ namespace Auth.Testing.AuthAPI.Controllers
 
         [HttpPut("EditUserProfileCommand")]
         [Authorize]
-        public async Task<IActionResult> EditUserProfileCommand(EditUserProfileRequestDto requestDto)
+        public async Task<IActionResult> EditUserProfile(EditUserProfileRequestDto requestDto)
         {
             var request = new EditUserProfileCommand()
             {
                 Dto = requestDto,
+                UserId = User.FindFirst("uid")!.Value,
+            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
+        }
+
+        [HttpDelete("LogoutFromAllSessions")]
+        [MultipleSessionAuthorize]
+        public async Task<IActionResult> LogoutFromAllSessions()
+        {
+            var request = new LogoutAllSessionsCommand()
+            {
+                UserId = User.FindFirst("uid")!.Value,
+            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
+        }
+
+        [HttpDelete("LogoutCurrentSession")]
+        [MultipleSessionAuthorize]
+        public async Task<IActionResult> LogoutCurrentSession()
+        {
+            var request = new LogoutCurrentSessionCommand()
+            {
+                Token = Request.Headers.Authorization.ToString().Split(" ")[1],
+            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
+        }
+
+        [HttpDelete("LogoutSessionById")]
+        [MultipleSessionAuthorize]
+        public async Task<IActionResult> LogoutSessionById(LogoutSessionByIdCommand request)
+        {
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
+        }
+
+        [HttpGet("GetAllUserSessions")]
+        [MultipleSessionAuthorize]
+        public async Task<IActionResult> GetAllUserSessions()
+        {
+            var request = new GetAllUserSessionsQuery()
+            {
                 UserId = User.FindFirst("uid")!.Value,
             };
             var response = await Mediator.Send(request);

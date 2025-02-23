@@ -1,7 +1,6 @@
 ﻿using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
-using Auth.Infraestructure.Identity.Enums;
 using Auth.Infraestructure.Identity.Extra;
 using Auth.Infraestructure.Identity.Features.Email.Commands.SendEmail;
 using MediatR;
@@ -13,8 +12,10 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
     /// <summary>
     /// 
     /// </summary>
-    public class CreateAccountCommand : IRequest<GenericApiResponse<string>>
+    public class CreateAccountCommand(string userType) : IRequest<GenericApiResponse<string>>
     {
+        public string UserType { get; } = userType;
+
         public required RegisterAccountRequestDto Dto { get; set; }
         public required string ORIGIN { get; set; }
     }
@@ -71,7 +72,7 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
 
                 var regiteredUser = await _userManager.FindByEmailAsync(user.Email);
                 response.Payload = regiteredUser!.Id;
-                await _userManager.AddToRoleAsync(user, Roles.User.ToString());
+                await _userManager.AddToRoleAsync(user, request.UserType);
 
                 var verificationUrl = await ExtraMethods.SendVerificationEMailUrl(user, request.ORIGIN, _userManager);
 
@@ -81,7 +82,8 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
                     Body = $"Please confirm your account visiting this URL {verificationUrl}",
                     Subject = "Confirm registration"
                 }, cancellationToken);
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = ex.Message;

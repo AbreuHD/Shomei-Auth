@@ -2,16 +2,10 @@
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
 {
-    class LogoutAllSessionsCommand : IRequest<GenericApiResponse<bool>>
+    public class LogoutAllSessionsCommand : IRequest<GenericApiResponse<bool>>
     {
         public required string UserId { get; set; }
     }

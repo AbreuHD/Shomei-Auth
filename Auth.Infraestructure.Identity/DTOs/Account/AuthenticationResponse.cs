@@ -4,19 +4,17 @@ namespace Auth.Infraestructure.Identity.DTOs.Account
 {
     public class AuthenticationResponse
     {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string LastName { get; set; }
-        public string UserName { get; set; }
-        public string Email { get; set; }
-        public string ImageProfile { get; set; }
+        public required string Id { get; set; }
+        public required string Name { get; set; }
+        public required string LastName { get; set; }
+        public required string UserName { get; set; }
+        public required string Email { get; set; }
 
-        public List<string> Roles { get; set; }
-        public bool IsVerified { get; set; }
+        public required List<string> Roles { get; set; }
+        public required bool IsVerified { get; set; }
 
-        public string JWToken { get; set; }
+        public required string JWToken { get; set; }
         [JsonIgnore]
-        public string RefreshToken { get; set; }
-
+        public string? RefreshToken { get; set; }
     }
 }

@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Auth.Infraestructure.Identity.Context
 {
-    public class IdentityContext : IdentityDbContext<ApplicationUser>
+    public class IdentityContext(DbContextOptions<IdentityContext> option) : IdentityDbContext<ApplicationUser>(option)
     {
-        public IdentityContext(DbContextOptions<IdentityContext> option) : base(option) { }
-
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

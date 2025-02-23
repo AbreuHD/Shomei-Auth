@@ -1,7 +1,6 @@
 ﻿using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.DTOs.PublicDtos;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
 using Auth.Infraestructure.Identity.Settings;
@@ -10,7 +9,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
-using System.Text.Json.Serialization;
 
 namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
 {
@@ -89,6 +87,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
                     Id = userResponse.Id,
                     Name = userResponse.Name,
                     LastName = userResponse.LastName,
+                    UserName = userResponse.UserName!,
                     Email = userResponse.Email!,
                     IsVerified = userResponse.EmailConfirmed,
                     Roles = [.. roles],
@@ -99,7 +98,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
                 var session = new UserSession
                 {
                     UserId = userResponse.Id,
-                    Token = token,
+                    Token = ExtraMethods.HashToken(token),
                     Expiration = jwtSecurityToken.ValidTo,
                     CreatedAt = DateTime.UtcNow,
                     IpAddress = request.IpAdress,
@@ -113,7 +112,6 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
                 response.Success = false;
                 response.Message = ex.Message;
                 response.Statuscode = StatusCodes.Status500InternalServerError;
-                response.Payload = new ();
             }
             return response;
         }

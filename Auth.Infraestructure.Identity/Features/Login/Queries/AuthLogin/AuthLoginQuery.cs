@@ -1,7 +1,6 @@
 ﻿using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.DTOs.PublicDtos;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
 using Auth.Infraestructure.Identity.Settings;
@@ -48,7 +47,25 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
 
         public async Task<GenericApiResponse<AuthenticationResponse>> Handle(AuthLoginQuery request, CancellationToken cancellationToken)
         {
-            var response = new GenericApiResponse<AuthenticationResponse>();
+            var response = new GenericApiResponse<AuthenticationResponse>()
+            {
+                Message = "Logged",
+                Statuscode = StatusCodes.Status200OK,
+                Success = true,
+                Payload = new AuthenticationResponse()
+                {
+                    Id = string.Empty,
+                    Name = string.Empty,
+                    LastName = string.Empty,
+                    UserName = string.Empty,
+                    Email = string.Empty,
+                    Roles = [],
+                    IsVerified = false,
+                    JWToken = string.Empty,
+                    RefreshToken = string.Empty,
+                }
+            };
+
             try
             {
                 var User = await _userManager.FindByNameAsync(request.Dto.UserName);
@@ -85,7 +102,7 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
                     var session = new UserSession
                     {
                         UserId = User.Id,
-                        Token = token,
+                        Token = ExtraMethods.HashToken(token),
                         Expiration = jwtSecurityToken.ValidTo,
                         IpAddress = request.IpAdress,
                         UserAgent = request.UserAgent,
@@ -100,6 +117,7 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
                 {
                     Id = User.Id,
                     Name = User.Name,
+                    UserName = User.UserName!,
                     LastName = User.LastName,
                     Email = User.Email!,
                     IsVerified = User.EmailConfirmed,
@@ -107,12 +125,12 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
                     JWToken = token,
                     RefreshToken = ExtraMethods.GenerateRefreshToken().Token
                 };
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = ex.Message;
                 response.Statuscode = StatusCodes.Status500InternalServerError;
-                response.Payload = new();
             }
             return response;
         }

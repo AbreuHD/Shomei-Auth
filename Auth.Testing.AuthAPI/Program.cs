@@ -1,24 +1,25 @@
 using Auth.Infraestructure.Identity;
+using Auth.Testing.AuthAPI.Extensions;
+using Auth.Testing.AuthAPI.ExtraConfig.Enums;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddHttpClient();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication(); //Add this line
 builder.Services.AddIdentityInfrastructure(builder.Configuration); //Add this line
-
+builder.Services.AddSwaggerExtension(); //Swagger Extension
 var app = builder.Build();
-
 // Configure the HTTP request pipeline.
 
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    await services.AddIdentityRolesAsync();
+    await services.AddIdentityRolesAsync(Enum.GetNames<Roles>());
 } // Add this block
 
 if (app.Environment.IsDevelopment())
