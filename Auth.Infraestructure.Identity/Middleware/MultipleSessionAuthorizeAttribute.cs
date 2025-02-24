@@ -31,7 +31,7 @@ namespace Auth.Infraestructure.Identity.Middleware
 
             if (authHeader == null || !IsValidAuthHeader(authHeader, out var token) ||
                 !TryGetUserIdFromToken(new JwtSecurityTokenHandler(), token, out var userId) ||
-                !await IsValidSession(dbContext!, token, userId))
+                !await IsValidSession(dbContext!, token, userId!))
             {
                 context.Result = UnauthorizedResponse();
             }
