@@ -1,4 +1,9 @@
-﻿# Shōmei
+﻿[![Quality Gate Status](https://sonarq.abreuhd.com/api/project_badges/measure?project=Auth&metric=alert_status&token=sqb_d7c96802205a85dff2eb2159c2a338f4f5f7565a)](https://sonarq.abreuhd.com/dashboard?id=Auth) 
+[![Lines of Code](https://sonarq.abreuhd.com/api/project_badges/measure?project=Auth&metric=ncloc&token=sqb_d7c96802205a85dff2eb2159c2a338f4f5f7565a)](https://sonarq.abreuhd.com/dashboard?id=Auth)
+[![Maintainability Rating](https://sonarq.abreuhd.com/api/project_badges/measure?project=Auth&metric=software_quality_maintainability_rating&token=sqb_d7c96802205a85dff2eb2159c2a338f4f5f7565a)](https://sonarq.abreuhd.com/dashboard?id=Auth)
+[![Security Rating](https://sonarq.abreuhd.com/api/project_badges/measure?project=Auth&metric=software_quality_security_rating&token=sqb_d7c96802205a85dff2eb2159c2a338f4f5f7565a)](https://sonarq.abreuhd.com/dashboard?id=Auth)
+
+# Shōmei
 ##### _The easiest way to have Identity in your project_
 
 ### Instalation
