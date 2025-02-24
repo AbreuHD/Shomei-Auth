@@ -13,18 +13,44 @@ using System.IdentityModel.Tokens.Jwt;
 namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
 {
     /// <summary>
-    /// SelectProfileQuery Class, this class is used to get the user and generate a JWT Token for the user with his profileId selected.
+    /// Query for selecting a user profile and generating a JWT token for the selected profile.
     /// </summary>
-    /// <param UserName="UserName">
-    /// <param Password="Password">
-    /// <returns>
-    /// <see cref="GenericApiResponse<AuthenticationResponse>"/>
-    /// </returns>
+    /// <remarks>
+    /// This query is used to fetch the user profile, validate the profile's association with the user,
+    /// and generate a JWT token that includes the user's profile information.
+    /// </remarks>
     public class SelectProfileQuery : IRequest<GenericApiResponse<AuthenticationResponse>>
     {
+        /// <summary>
+        /// The data transfer object containing the profile selection information.
+        /// </summary>
+        /// <remarks>
+        /// This object holds the profile ID selected by the user for authentication and token generation.
+        /// </remarks>
         public required SelectProfileRequestDto Dto { get; set; }
+
+        /// <summary>
+        /// The unique identifier of the user.
+        /// </summary>
+        /// <remarks>
+        /// This is used to find the correct user profile and authenticate the user.
+        /// </remarks>
         public required string UserId { get; set; }
+
+        /// <summary>
+        /// The user agent string from the device making the request.
+        /// </summary>
+        /// <remarks>
+        /// This is used for logging and tracking the user's session details.
+        /// </remarks>
         public required string UserAgent { get; set; }
+
+        /// <summary>
+        /// The IP address of the device making the request.
+        /// </summary>
+        /// <remarks>
+        /// This is used for security purposes and logging the user's session.
+        /// </remarks>
         public required string IpAdress { get; set; }
     }
     internal class SelectProfileQueryHandler(UserManager<ApplicationUser> userManager,
@@ -45,7 +71,12 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
 
         public async Task<GenericApiResponse<AuthenticationResponse>> Handle(SelectProfileQuery request, CancellationToken cancellationToken)
         {
-            var response = new GenericApiResponse<AuthenticationResponse>();
+            var response = new GenericApiResponse<AuthenticationResponse>()
+            {
+                Success = false,
+                Statuscode = StatusCodes.Status500InternalServerError,
+                Message = "N/A"
+            };
             try
             {
                 var profileResponse = await _identityContext.Set<Entities.UserProfile>().FindAsync([request.Dto.Profile], cancellationToken: cancellationToken);

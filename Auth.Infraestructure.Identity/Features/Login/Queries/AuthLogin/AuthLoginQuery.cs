@@ -14,18 +14,33 @@ using System.IdentityModel.Tokens.Jwt;
 namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
 {
     /// <summary>
-    /// AuthLoginQuery Class, this class is used to login the user and generate a JWT Token for the user.
+    /// Represents a query used to authenticate a user and generate a JWT Token for login.
+    /// It validates the user credentials and returns the authentication details, including the JWT token and refresh token.
     /// </summary>
-    /// <param LoginRequestDto="LoginRequestDto">
-    /// <param UserAgent="UserAgent">
-    /// <param IpAdress="IpAdress">
-    /// <returns>
-    /// <see cref="GenericApiResponse<AuthenticationResponse>"/>
-    /// </returns>
     public class AuthLoginQuery : IRequest<GenericApiResponse<AuthenticationResponse>>
     {
+        /// <summary>
+        /// The data transfer object (DTO) containing the username and password for user authentication.
+        /// </summary>
+        /// <value>
+        /// A <see cref="LoginRequestDto"/> that holds the username and password for authentication.
+        /// </value>
         public required LoginRequestDto Dto { get; set; }
+
+        /// <summary>
+        /// The user agent string representing the client's browser or application information.
+        /// </summary>
+        /// <value>
+        /// A string representing the user agent.
+        /// </value>
         public required string UserAgent { get; set; }
+
+        /// <summary>
+        /// The IP address of the client making the login request.
+        /// </summary>
+        /// <value>
+        /// A string representing the IP address.
+        /// </value>
         public required string IpAdress { get; set; }
     }
 

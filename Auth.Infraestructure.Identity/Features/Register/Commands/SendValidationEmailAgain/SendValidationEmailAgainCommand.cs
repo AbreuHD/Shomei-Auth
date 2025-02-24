@@ -4,14 +4,25 @@ using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
 using Auth.Infraestructure.Identity.Features.Email.Commands.SendEmail;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
 
 namespace Auth.Infraestructure.Identity.Features.Register.Commands.SendValidationEmailAgain
 {
+    /// <summary>
+    /// Command for sending a validation email again to the user in case the user needs to confirm their registration email.
+    /// </summary>
     public class SendValidationEmailAgainCommand : IRequest<GenericApiResponse<string>>
     {
+        /// <summary>
+        /// Contains the request data for the validation email resend, including the user's email.
+        /// </summary>
         public required SendValidationEmailAgainRequestDto Dto { get; set; }
+
+        /// <summary>
+        /// The origin of the request, typically used for creating the verification URL.
+        /// </summary>
         public required string Origin { get; set; }
     }
 
@@ -22,7 +33,12 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.SendValidatio
 
         public async Task<GenericApiResponse<string>> Handle(SendValidationEmailAgainCommand request, CancellationToken cancellationToken)
         {
-            var response = new GenericApiResponse<string>();
+            var response = new GenericApiResponse<string>()
+            {
+                Success = false,
+                Statuscode = StatusCodes.Status500InternalServerError,
+                Message = "N/A"
+            };
             try
             {
                 var user = await _userManager.FindByEmailAsync(request.Dto.Email);

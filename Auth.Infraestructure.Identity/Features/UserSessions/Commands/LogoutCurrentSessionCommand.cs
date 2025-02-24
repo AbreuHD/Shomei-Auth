@@ -7,8 +7,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
 {
+    /// <summary>
+    /// Command to log out the current session using the provided token.
+    /// </summary>
+    /// <remarks>
+    /// This command finds the session associated with the given token and removes it from the database,
+    /// effectively logging the user out of the current session.
+    /// </remarks>
     public class LogoutCurrentSessionCommand : IRequest<GenericApiResponse<bool>>
     {
+        /// <summary>
+        /// The token of the session to be logged out.
+        /// </summary>
         public required string Token { get; set; }
     }
     internal class LogoutCurrentSessionCommandHandler(IdentityContext identityContext) : IRequestHandler<LogoutCurrentSessionCommand, GenericApiResponse<bool>>

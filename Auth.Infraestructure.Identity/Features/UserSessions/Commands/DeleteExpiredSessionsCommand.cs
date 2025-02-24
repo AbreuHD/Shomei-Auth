@@ -5,9 +5,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
 {
+    /// <summary>
+    /// Command to delete expired user sessions from the database.
+    /// </summary>
+    /// <remarks>
+    /// This command is used to find and delete sessions that have expired, ensuring that inactive sessions are removed from the system.
+    /// </remarks>
     public class DeleteExpiredSessionsCommand : IRequest<Unit> { }
 
-    public class DeleteExpiredSessionsCommandHandler(IdentityContext _identityContext)
+    internal class DeleteExpiredSessionsCommandHandler(IdentityContext _identityContext)
         : IRequestHandler<DeleteExpiredSessionsCommand, Unit>
     {
         public async Task<Unit> Handle(DeleteExpiredSessionsCommand request, CancellationToken cancellationToken)

@@ -10,9 +10,20 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace Auth.Infraestructure.Identity.Middleware
 {
+    /// <summary>
+    /// A custom authorization filter that checks if the user has a valid session by verifying the JWT token.
+    /// This attribute can be applied to both classes and methods. It ensures that the user's session is valid,
+    /// and if not, returns an unauthorized response (HTTP 401).
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public class MultipleSessionAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
     {
+
+        /// <summary>
+        /// Asynchronously checks if the user is authorized to access the resource.
+        /// It validates the authorization header, token, and session status.
+        /// If any validation fails, an unauthorized response is returned.
+        /// </summary>
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
             var dbContext = context.HttpContext.RequestServices.GetService(typeof(IdentityContext)) as IdentityContext;
