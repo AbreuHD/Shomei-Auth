@@ -7,6 +7,9 @@ namespace Auth.Testing.AuthAPI.Extensions
     {
         public static void AddSwaggerExtension(this IServiceCollection service)
         {
+            string SECURITY_DEFINITION = "Bearer";
+            var URL = new Uri("https://abreuhd.com");
+
             service.AddSwaggerGen(options =>
             {
                 List<string> xmlFiles = [.. Directory.GetFiles(AppContext.BaseDirectory, "*.xml", SearchOption.TopDirectoryOnly)];
@@ -21,19 +24,19 @@ namespace Auth.Testing.AuthAPI.Extensions
                     {
                         Email = "jefferson@abreuhd.com",
                         Name = "Jefferson Abreu",
-                        Url = new Uri("https://abreuhd.com")
+                        Url = URL
                     }
                 });
 
                 options.EnableAnnotations();
 
                 options.DescribeAllParametersInCamelCase();
-                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                options.AddSecurityDefinition(SECURITY_DEFINITION, new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer",
+                    Scheme = SECURITY_DEFINITION,
                     BearerFormat = "JWT",
                     Description = "Input your Bearer token in this format - Bearer {Token}"
                 });
@@ -45,10 +48,10 @@ namespace Auth.Testing.AuthAPI.Extensions
                             Reference = new OpenApiReference
                             {
                                 Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
+                                Id = SECURITY_DEFINITION
                             },
-                            Scheme = "Bearer",
-                            Name = "Bearer",
+                            Scheme = SECURITY_DEFINITION,
+                            Name = SECURITY_DEFINITION,
                             In = ParameterLocation.Header,
                         }, new List<string>()
                     },

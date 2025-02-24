@@ -1,12 +1,12 @@
 ﻿using Auth.Infraestructure.Identity.Context;
+using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Threading;
 
 namespace Auth.Infraestructure.Identity.Middleware
 {
@@ -18,46 +18,60 @@ namespace Auth.Infraestructure.Identity.Middleware
             var dbContext = context.HttpContext.RequestServices.GetService(typeof(IdentityContext)) as IdentityContext;
             var authHeader = context.HttpContext.Request.Headers.Authorization.FirstOrDefault();
 
-            if (authHeader == null || !authHeader.StartsWith("Bearer "))
+            if (!IsValidAuthHeader(authHeader, out var token) ||
+                !TryGetUserIdFromToken(new JwtSecurityTokenHandler(), token, out var userId) ||
+                !await IsValidSession(dbContext, token, userId))
             {
-                context.Result = new UnauthorizedResult();
+                context.Result = UnauthorizedResponse();
             }
-            else
+        }
+
+        private static ObjectResult UnauthorizedResponse()
+        {
+            return new ObjectResult(new GenericApiResponse<bool>
             {
-                var token = authHeader.Split(" ")[^1];
-                var tokenHandler = new JwtSecurityTokenHandler();
+                Success = false,
+                Statuscode = StatusCodes.Status401Unauthorized,
+                Message = "Unauthorized",
+                Payload = false
+            })
+            {
+                StatusCode = StatusCodes.Status401Unauthorized
+            };
+        }
 
-                try
-                {
-                    var jwtToken = tokenHandler.ReadJwtToken(token);
-                    var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "uid")?.Value;
+        private static bool IsValidAuthHeader(string authHeader, out string token)
+        {
+            token = string.Empty;
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+                return false;
 
-                    if (userId == null)
-                    {
-                        context.Result = new UnauthorizedResult();
-                    }
-                    else
-                    {
-                        var tokenHased = ExtraMethods.HashToken(token);
-                        var session = await dbContext.Set<UserSession>()
-                            .FirstOrDefaultAsync(s => s.Token == tokenHased && s.UserId == userId);
+            token = authHeader.Split(" ")[^1];
+            return true;
+        }
 
-                        if (session == null || session.Expiration < DateTime.UtcNow)
-                        {
-                            if (session != null)
-                            {
-                                dbContext.Set<UserSession>().Remove(session);
-                                await dbContext.SaveChangesAsync();
-                            }
-                            context.Result = new UnauthorizedResult();
-                        }
-                    }
-                }
-                catch
-                {
-                    context.Result = new UnauthorizedResult();
-                }
+        private static bool TryGetUserIdFromToken(JwtSecurityTokenHandler tokenHandler, string token, out string userId)
+        {
+            userId = string.Empty;
+            try
+            {
+                var jwtToken = tokenHandler.ReadJwtToken(token);
+                userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "uid")?.Value;
+                return !string.IsNullOrEmpty(userId);
             }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static async Task<bool> IsValidSession(DbContext dbContext, string token, string userId)
+        {
+            var tokenHased = ExtraMethods.HashToken(token);
+            var session = await dbContext.Set<UserSession>()
+                .FirstOrDefaultAsync(s => s.Token == tokenHased && s.UserId == userId);
+
+            return session != null && session.Expiration >= DateTime.UtcNow;
         }
     }
 }
