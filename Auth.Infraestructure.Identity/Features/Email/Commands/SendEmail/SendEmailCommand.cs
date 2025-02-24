@@ -3,6 +3,7 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using MediatR;
 using MimeKit;
+using System.Net.Security;
 
 namespace Auth.Infraestructure.Identity.Features.Email.Commands.SendEmail
 {
@@ -58,7 +59,10 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands.SendEmail
                 email.Body = bodyBuilder.ToMessageBody();
 
                 using SmtpClient smtp = new();
-                smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                smtp.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>
+                {
+                    return sslPolicyErrors == SslPolicyErrors.None;
+                };
                 await smtp.ConnectAsync(MailSettings.SmtpHost, MailSettings.SmtpPort, SecureSocketOptions.SslOnConnect, cancellationToken);
                 await smtp.AuthenticateAsync(MailSettings.SmtpUser, MailSettings.SmtpPassword, cancellationToken);
                 await smtp.SendAsync(email);

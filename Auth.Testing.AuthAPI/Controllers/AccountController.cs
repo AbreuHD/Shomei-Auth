@@ -12,6 +12,8 @@ using Auth.Testing.AuthAPI.ExtraConfig.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Security.Cryptography;
 
 namespace Auth.Testing.AuthAPI.Controllers
 {
@@ -70,12 +72,15 @@ namespace Auth.Testing.AuthAPI.Controllers
         }
 
         [HttpPost("TestMiddleware")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [MultipleSessionAuthorize]
         [ClaimRequired("ProfileId", "You need select a profile")]
-        public async Task<IActionResult> TestMiddleware()
+        public IActionResult TestMiddleware()
         {
-            var rng = new Random().Next();
-            return Ok(rng);
+            var randomGenerator = RandomNumberGenerator.Create();
+            byte[] data = new byte[16];
+            randomGenerator.GetBytes(data);
+            return Ok(BitConverter.ToString(data));
         }
 
         [HttpPost("SelectProfile")]
