@@ -5,8 +5,18 @@ using Microsoft.AspNetCore.Http;
 
 namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
 {
+    /// <summary>
+    /// Command to log out all sessions for a specific user.
+    /// </summary>
+    /// <remarks>
+    /// This command removes all active sessions for the given user from the database,
+    /// effectively logging the user out of all devices or sessions.
+    /// </remarks>
     public class LogoutAllSessionsCommand : IRequest<GenericApiResponse<bool>>
     {
+        /// <summary>
+        /// The unique identifier of the user whose sessions will be logged out.
+        /// </summary>
         public required string UserId { get; set; }
     }
     internal class LogoutAllSessionsCommandHandler(IdentityContext identityContext) : IRequestHandler<LogoutAllSessionsCommand, GenericApiResponse<bool>>

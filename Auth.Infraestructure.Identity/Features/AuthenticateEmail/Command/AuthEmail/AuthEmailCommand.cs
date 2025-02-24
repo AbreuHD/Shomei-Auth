@@ -9,8 +9,19 @@ using System.Text;
 
 namespace Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail
 {
+    /// <summary>
+    /// This class is used to authenticate and confirm a user's email by validating a confirmation token.
+    /// It handles the process of confirming the user's email address during the account activation process.
+    /// </summary>
     public class AuthEmailCommand : IRequest<GenericApiResponse<string>>
     {
+        /// <summary>
+        /// The data transfer object (DTO) that contains the necessary information for email confirmation.
+        /// It includes the user ID and the confirmation token that will be validated to authenticate and confirm the email.
+        /// </summary>
+        /// <value>
+        /// A <see cref="ConfirmEmailRequestDto"/> object that holds the user ID and the token needed for the email confirmation process.
+        /// </value>
         public required ConfirmEmailRequestDto Dto { get; set; }
     }
 
@@ -20,7 +31,12 @@ namespace Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthE
 
         public async Task<GenericApiResponse<string>> Handle(AuthEmailCommand request, CancellationToken cancellationToken)
         {
-            var response = new GenericApiResponse<string>();
+            var response = new GenericApiResponse<string>() 
+            {
+                Success = false,
+                Statuscode = StatusCodes.Status500InternalServerError,
+                Message = "N/A"
+            };
             try
             {
                 var user = await _userManager.FindByIdAsync(request.Dto.UserId);

@@ -10,13 +10,36 @@ using Microsoft.AspNetCore.Identity;
 namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
 {
     /// <summary>
-    /// 
+    /// Represents a command to create a new user account.
+    /// This command checks for the availability of the username and email, 
+    /// creates the user in the system, assigns the appropriate role, 
+    /// and sends a confirmation email with a verification link.
     /// </summary>
     public class CreateAccountCommand(string userType) : IRequest<GenericApiResponse<string>>
     {
+        /// <summary>
+        /// The data transfer object (DTO) that contains the necessary information for creating the account.
+        /// </summary>
+        /// <value>
+        /// A <see cref="RegisterAccountRequestDto"/> that contains the user's registration details like name, email, username, password, etc.
+        /// </value>
+        public required RegisterAccountRequestDto Dto { get; set; }
+
+        /// <summary>
+        /// The type of user (e.g., admin, regular user).
+        /// This determines the role assigned to the newly created account.
+        /// </summary>
+        /// <value>
+        /// A string representing the user type (role) to assign to the new user.
+        /// </value>
         public string UserType { get; } = userType;
 
-        public required RegisterAccountRequestDto Dto { get; set; }
+        // <summary>
+        /// The origin URL where the user will be redirected after successful email verification.
+        /// </summary>
+        /// <value>
+        /// A string representing the origin URL for the verification email.
+        /// </value>
         public required string ORIGIN { get; set; }
     }
     internal class CreateAccountCommandHandler(UserManager<ApplicationUser> userManager, IMediator mediator) : IRequestHandler<CreateAccountCommand, GenericApiResponse<string>>
@@ -26,7 +49,13 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
 
         public async Task<GenericApiResponse<string>> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
         {
-            var response = new GenericApiResponse<string>();
+            var response = new GenericApiResponse<string>()
+            {
+                Payload = "N/A",
+                Success = false,
+                Statuscode = StatusCodes.Status500InternalServerError,
+                Message = "N/A"
+            };
             try
             {
                 var UserNameExist = await _userManager.FindByNameAsync(request.Dto.UserName);
@@ -45,6 +74,15 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
                 {
                     response.Success = false;
                     response.Message = $"Email {request.Dto.Email} is already registered";
+                    response.Statuscode = StatusCodes.Status406NotAcceptable;
+                    response.Payload = string.Empty;
+                    return response;
+                }
+
+                if (request.Dto.Password != request.Dto.ConfirmPassword)
+                {
+                    response.Success = false;
+                    response.Message = "Passwords do not match";
                     response.Statuscode = StatusCodes.Status406NotAcceptable;
                     response.Payload = string.Empty;
                     return response;

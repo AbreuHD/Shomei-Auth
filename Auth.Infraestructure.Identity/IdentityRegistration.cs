@@ -1,4 +1,5 @@
-﻿using Auth.Infraestructure.Identity.Context;
+﻿using Auth.Infraestructure.Identity.BackgroundServices;
+using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Seeds;
@@ -129,6 +130,7 @@ namespace Auth.Infraestructure.Identity
             });
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<MailSettings>>().Value);
+            services.AddHostedService<SessionCleanupService>();
         }
 
         public static async Task AddIdentityRolesAsync(this IServiceProvider services, IEnumerable<string> roles)
