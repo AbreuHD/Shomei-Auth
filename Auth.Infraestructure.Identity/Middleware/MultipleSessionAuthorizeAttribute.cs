@@ -29,9 +29,9 @@ namespace Auth.Infraestructure.Identity.Middleware
             var dbContext = context.HttpContext.RequestServices.GetService(typeof(IdentityContext)) as IdentityContext;
             var authHeader = context.HttpContext.Request.Headers.Authorization.FirstOrDefault();
 
-            if (!IsValidAuthHeader(authHeader, out var token) ||
+            if (authHeader == null || !IsValidAuthHeader(authHeader, out var token) ||
                 !TryGetUserIdFromToken(new JwtSecurityTokenHandler(), token, out var userId) ||
-                !await IsValidSession(dbContext, token, userId))
+                !await IsValidSession(dbContext!, token, userId))
             {
                 context.Result = UnauthorizedResponse();
             }
@@ -61,9 +61,9 @@ namespace Auth.Infraestructure.Identity.Middleware
             return true;
         }
 
-        private static bool TryGetUserIdFromToken(JwtSecurityTokenHandler tokenHandler, string token, out string userId)
+        private static bool TryGetUserIdFromToken(JwtSecurityTokenHandler tokenHandler, string token, out string? userId)
         {
-            userId = string.Empty;
+            userId = null;
             try
             {
                 var jwtToken = tokenHandler.ReadJwtToken(token);
