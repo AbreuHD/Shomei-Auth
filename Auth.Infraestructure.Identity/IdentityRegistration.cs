@@ -2,7 +2,6 @@
 using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
-using Auth.Infraestructure.Identity.Features.UserSessions.Commands;
 using Auth.Infraestructure.Identity.Seeds;
 using Auth.Infraestructure.Identity.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

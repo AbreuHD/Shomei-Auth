@@ -2,11 +2,6 @@
 using Auth.Infraestructure.Identity.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
 {
