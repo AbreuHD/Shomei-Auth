@@ -42,3 +42,5 @@ If you found **Shōmei** useful and would like to support the project, feel free
 
 <a href="https://www.buymeacoffee.com/abreuhd"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a pizza&emoji=🍕&slug=abreuhd&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" /></a>
 
+
+> **Note:** The license is currently **Apache License 2.0**, and while we don’t expect it to change anytime soon, who knows what the future holds? (This is just for legal reasons.) We’re not fortune tellers. Future versions might have a different license, but don’t worry—old versions will stick with the license they came with.
