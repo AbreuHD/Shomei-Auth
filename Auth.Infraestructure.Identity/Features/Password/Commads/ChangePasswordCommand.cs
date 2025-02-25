@@ -1,8 +1,10 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Generic;
+﻿using Auth.Infraestructure.Identity.DTOs.Email;
+using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.DTOs.Password;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
-using Auth.Infraestructure.Identity.Features.Email.Commands.SendEmail;
+using Auth.Infraestructure.Identity.Mails;
+using Auth.Infraestructure.Identity.Settings;
 using MediatR;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Http;
@@ -36,7 +38,7 @@ namespace Auth.Infraestructure.Identity.Features.Password.Commads
         /// <value>
         /// A string representing the user agent.
         /// </value>
-        public required string UserAgent { get; set; }
+        public string? UserAgent { get; set; }
 
         /// <summary>
         /// The IP address of the client making the login request.
@@ -44,13 +46,16 @@ namespace Auth.Infraestructure.Identity.Features.Password.Commads
         /// <value>
         /// A string representing the IP address.
         /// </value>
-        public required string IpAdress { get; set; }
+        public string? IpAdress { get; set; }
     }
-    internal class ChangePasswordCommandHandler(UserManager<ApplicationUser> userManager, IMediator mediator, IHttpClientFactory httpClientFactory) : IRequestHandler<ChangePasswordCommand, GenericApiResponse<bool>>
+    internal class ChangePasswordCommandHandler(UserManager<ApplicationUser> userManager,
+            MailSettings mailSettings,
+            IHttpClientFactory httpClientFactory
+        ) : IRequestHandler<ChangePasswordCommand, GenericApiResponse<bool>>
     {
+        private readonly MailSettings _mailSettings = mailSettings;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
-        private IMediator Mediator { get; } = mediator;
 
         public async Task<GenericApiResponse<bool>> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
         {
@@ -93,21 +98,24 @@ namespace Auth.Infraestructure.Identity.Features.Password.Commads
             }
             var result = await _userManager.ChangePasswordAsync(user, request.Dto.CurrentPassword, request.Dto.NewPassword);
 
-            if(result.Succeeded)
+            if (result.Succeeded)
             {
-                var geoInfo = await ExtraMethods.GetGeoLocationInfo(request.IpAdress, _httpClientFactory);
-
                 response.Payload = true;
                 response.Success = true;
                 response.Statuscode = StatusCodes.Status200OK;
                 response.Message = "Password changed successfully";
 
-                await Mediator.Send(new SendEmailCommand
+                if (request.UserAgent != null && request.IpAdress != null)
                 {
-                    To = user.Email!,
-                    Body = $"Password changed successfully from {request.UserAgent} {geoInfo?.Country ?? ""}",
-                    Subject = "Password changed"
-                }, cancellationToken);
+                    var geoInfo = await ExtraMethods.GetGeoLocationInfo(request.IpAdress, _httpClientFactory);
+                    await ExtraMethods.SendEmail(_mailSettings, new SendEmailRequestDto
+                    {
+                        To = user.Email!,
+                        Body = ChangePasswordMail.GetEmailHtml(request.IpAdress, geoInfo?.Country ?? "", request.UserAgent),
+                        Subject = "Password Changed"
+                    });
+                }
+
             }
             else
             {

@@ -1,5 +1,7 @@
 using Auth.Infraestructure.Identity.DTOs.Account;
+using Auth.Infraestructure.Identity.DTOs.Email;
 using Auth.Infraestructure.Identity.DTOs.Password;
+using Auth.Infraestructure.Identity.Extra;
 using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
 using Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin;
 using Auth.Infraestructure.Identity.Features.Password.Commads;
@@ -15,6 +17,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Net.Http;
 using System.Security.Cryptography;
 
 namespace Auth.Testing.AuthAPI.Controllers
@@ -64,6 +67,7 @@ namespace Auth.Testing.AuthAPI.Controllers
         [HttpPost("ResentConfirmation")]
         public async Task<IActionResult> ResentConfirmation([FromBody] SendValidationEmailAgainRequestDto requestDto)
         {
+
             var request = new SendValidationEmailAgainCommand
             {
                 Dto = requestDto,
@@ -195,8 +199,8 @@ namespace Auth.Testing.AuthAPI.Controllers
             {
                 Dto = requestDto,
                 UserId = User.FindFirst("uid")!.Value,
-                UserAgent = Request.Headers.UserAgent.ToString(),
-                IpAdress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown"
+                IpAdress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
+                UserAgent = Request.Headers.UserAgent.ToString()
             };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);

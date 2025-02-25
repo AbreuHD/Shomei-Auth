@@ -1,21 +1,64 @@
 ﻿using Auth.Infraestructure.Identity.DTOs.Account;
+using Auth.Infraestructure.Identity.DTOs.Email;
 using Auth.Infraestructure.Identity.DTOs.Geolocation;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Settings;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
+using MimeKit;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Security;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 
 namespace Auth.Infraestructure.Identity.Extra
 {
     public static class ExtraMethods
     {
-        internal static async Task<GeoLocationInfoDto?> GetGeoLocationInfo(string ipAddress, IHttpClientFactory _httpClientFactory)
+        public static async Task<bool> SendEmail(MailSettings mailSettings, SendEmailRequestDto requestDto)
+        {
+            try
+            {
+                MimeMessage email = new()
+                {
+                    Sender = MailboxAddress.Parse($"{mailSettings.DisplayName} <{mailSettings.EmailFrom}>")
+                };
+                email.From.Add(new MailboxAddress(mailSettings.DisplayName, mailSettings.EmailFrom));
+                email.To.Add(MailboxAddress.Parse(requestDto.To));
+                email.Subject = requestDto.Subject;
+                BodyBuilder bodyBuilder = new()
+                {
+                    HtmlBody = requestDto.Body
+                };
+                email.Body = bodyBuilder.ToMessageBody();
+
+                using SmtpClient smtp = new();
+                smtp.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>
+                {
+                    return sslPolicyErrors == SslPolicyErrors.None;
+                };
+                await smtp.ConnectAsync(mailSettings.SmtpHost, mailSettings.SmtpPort, SecureSocketOptions.SslOnConnect);
+                await smtp.AuthenticateAsync(mailSettings.SmtpUser, mailSettings.SmtpPassword);
+                await smtp.SendAsync(email);
+                await smtp.DisconnectAsync(true);
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
+        public static async Task<GeoLocationInfoDto?> GetGeoLocationInfo(string ipAddress, IHttpClientFactory _httpClientFactory)
         {
             try
             {
@@ -30,7 +73,6 @@ namespace Auth.Infraestructure.Identity.Extra
             }
             catch (Exception ex)
             {
-                // Manejo de errores si la solicitud falla
                 Console.WriteLine($"Error al obtener información de geolocalización: {ex.Message}");
             }
 
@@ -67,7 +109,7 @@ namespace Auth.Infraestructure.Identity.Extra
             };
         }
 
-        internal static async Task<string> SendVerificationEMailUrl(ApplicationUser user, string origin, UserManager<ApplicationUser> _userManager)
+        public static async Task<string> SendVerificationEMailUrl(ApplicationUser user, string origin, UserManager<ApplicationUser> _userManager)
         {
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
