@@ -3,51 +3,36 @@
 [![Maintainability Rating](https://sonarq.abreuhd.com/api/project_badges/measure?project=Auth&metric=software_quality_maintainability_rating&token=sqb_d7c96802205a85dff2eb2159c2a338f4f5f7565a)](https://sonarq.abreuhd.com/dashboard?id=Auth)
 [![Security Rating](https://sonarq.abreuhd.com/api/project_badges/measure?project=Auth&metric=software_quality_security_rating&token=sqb_d7c96802205a85dff2eb2159c2a338f4f5f7565a)](https://sonarq.abreuhd.com/dashboard?id=Auth)
 
-# Shōmei
-##### _The easiest way to have Identity in your project_
+### **Shōmei - Fast and Secure Authentication System**  
 
-### Instalation
+**Shōmei** is a **JWT-based authentication package** designed to help projects implement authentication quickly, securely, and flexibly. It provides a robust system that supports **multiple profiles per account**, similar to Netflix, along with advanced permission and role management.  
 
-- **Step 0: Install NuGet**
-```bash
-  Auth.Infraestructure.Identity
-  ```
-- **Step 1: Install EntityFrameworkCore.Tools NuGet**
-```bash
-  Microsoft.EntityFrameworkCore.Tools
-  ```
-- **Step 2: Add this two lines of code in Program.cs**
-```csharp
-builder.Services.AddAuthentication();
-builder.Services.AddIdentityInfrastructure(builder.Configuration);
-  ```
-  
-- **Step 3: Add this lines of code in Program.cs**
-```csharp
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    await services.AddIdentityRolesAsync();
-} //
-  ```
-- **Step 4: Add this variables in AppSettings.json**
-```bash
-  "ConnectionStrings": {
-    "IdentityConnection": "server={YourServer};user={YourDbUser};password={YourDbPassword};database={YourDbName}"
-  },
-  "JWTSettings": {
-    "Key": "{Key}",
-    "Issuer": "{Issuer}",
-    "Audience": "{Audience}",
-    "DurationInMinutes": {DurationOftTokens}
-  },
-  "MailSettings": {
-    "EmailFrom": "{EmailFrom}",
-    "SmtpHost": "{SmtpHost}",
-    "SmtpPort": {SmtpPort},
-    "SmtpUser": "{SmtpUser}",
-    "SmtpPassword": "{SmtpPassword}",
-    "DisplayName": "{DisplayName}"
-  },
-  ```
-- **Step 5: That's All :p**
+### **Key Features:**  
+✅ **JWT Authentication:** Provides secure access tokens for managing user sessions.  
+✅ **Multiple Profile Support:** Each account can have multiple profiles, allowing for independent customization and control.  
+✅ **Role and Permission Management:** Defines differentiated access according to system requirements.  
+✅ **Enhanced Security:** Implements best security practices to protect credentials and user data.  
+✅ **Scalability and Flexibility:** Easily integrates with any API or backend service.  
+
+### **Technologies & Patterns Used:**  
+🚀 **CQRS (Command Query Responsibility Segregation)** for clear separation between queries and commands.  
+🔄 **MediatR** for efficient handling of events and commands.  
+🛠 **Entity Framework Core** for data persistence.  
+🔐 **FluentValidation** for request validation in authentication flows.  
+📢 **Serilog** for structured logging and security auditing.  
+
+### **Database Support:**  
+✔️ **MySQL** (Currently supported)  
+⬜ **SQL Server** (Coming soon)  
+⬜ **PostgreSQL** (Coming soon)  
+
+Shōmei is the perfect solution for projects that require **fast, secure, and highly customizable authentication**. 🚀
+
+---
+
+### **📖 Documentation & Implementation Guide (if you see this is not ready yet come back 👻)**  
+Check out the full documentation to learn how to implement **Shōmei** in your project:  
+
+🔗 [**Shōmei Documentation**](https://shomei.abreuhd.com/)  
+
+---
