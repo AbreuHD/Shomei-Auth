@@ -79,27 +79,21 @@ namespace Auth.Infraestructure.Identity.Extra
             return null;
         }
 
-        public static bool ValidateToken(string token, string storedHash)
-        {
-            var hashInput = HashToken(token);
-            return hashInput == storedHash;
-        }
-
-        public static string HashToken(string token)
+        internal static string HashToken(string token)
         {
             var bytes = Encoding.UTF8.GetBytes(token);
             var hash = SHA256.HashData(bytes);
             return Convert.ToBase64String(hash);
         }
 
-        public static string RandomTokenString()
+        internal static string RandomTokenString()
         {
             var randomBytes = new byte[40];
             RandomNumberGenerator.Fill(randomBytes);
             return BitConverter.ToString(randomBytes).Replace("-", "");
         }
 
-        public static RefreshToken GenerateRefreshToken()
+        internal static RefreshToken GenerateRefreshToken()
         {
             return new RefreshToken
             {
@@ -109,7 +103,7 @@ namespace Auth.Infraestructure.Identity.Extra
             };
         }
 
-        public static async Task<string> SendVerificationEMailUrl(ApplicationUser user, string origin, UserManager<ApplicationUser> _userManager)
+        internal static async Task<string> SendVerificationEMailUrl(ApplicationUser user, string origin, UserManager<ApplicationUser> _userManager)
         {
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
