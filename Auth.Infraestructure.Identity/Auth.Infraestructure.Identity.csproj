@@ -41,8 +41,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Email\Queries\" />
     <Folder Include="Features\ForgotPSW\" />
+    <Folder Include="Features\UserName\Commands\" />
   </ItemGroup>
 
   <ItemGroup>

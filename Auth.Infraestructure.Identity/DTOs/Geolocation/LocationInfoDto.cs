@@ -2,13 +2,13 @@
 
 namespace Auth.Infraestructure.Identity.DTOs.Geolocation
 {
-    internal class LocationInfoDto
+    public class LocationInfoDto
     {
         [JsonProperty("location")]
         public required GeoLocationInfoDto Location { get; set; }
     }
 
-    internal class GeoLocationInfoDto
+    public class GeoLocationInfoDto
     {
         [JsonProperty("country")]
         public required string Country { get; set; }
