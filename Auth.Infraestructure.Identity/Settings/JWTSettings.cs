@@ -1,10 +1,12 @@
-﻿namespace Auth.Infraestructure.Identity.Settings
+﻿
+namespace Auth.Infraestructure.Identity.Settings
 {
-    public class JWTSettings
+    public class JwtSettings
     {
-        public string Key { get; set; }
-        public string Issuer { get; set; }
-        public string Audience { get; set; }
-        public int DurationInMinutes { get; set; }
+        public required string Key { get; set; }
+        public required string Issuer { get; set; }
+        public required string Audience { get; set; }
+        public required int DurationInMinutes { get; set; }
+        public required bool UseDifferentProfiles { get; set; }
     }
 }

@@ -4,7 +4,7 @@ pipeline {
         NUGET_API_KEY = credentials('private_nuget_api_key')
         NUGET_SERVER_URL = credentials('private_nuget_uri')
         SONARQUBE_EXCLUDE_FILES = "**/*.xml,**/*.json,**/*.html,**/*.css,**/*.js,**/Program.cs,**/Startup.cs,**/Migrations/**"
-        VERSION = "0.0.6"
+        VERSION = "0.1.1"
     }
 
     stages {
@@ -26,6 +26,18 @@ pipeline {
                 }
             }
         }
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    script {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                        }
+                    }
+                }
+            }
+        }
         stage('Build') {
             steps {
                 echo 'Building the project...'
@@ -39,7 +51,6 @@ pipeline {
                 sh 'dotnet pack Auth.Infraestructure.Identity/Auth.Infraestructure.Identity.csproj --configuration Release -p:Version=${VERSION} --output ./nupkgs'
             }
         }
-
         stage('Publish NuGet package') {
             steps {
                 echo 'Uploading NuGet package to the repository...'

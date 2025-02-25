@@ -12,18 +12,6 @@ pipeline {
                 sh 'dotnet restore Auth.sln'
             }
         }
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    def scannerHome = tool 'SonarQ-DotNET8'
-                    withSonarQubeEnv('SonarQ') {
-                        sh "dotnet ${scannerHome}/SonarScanner.MSBuild.dll begin /k:\"Auth\""
-                        sh "dotnet build"
-                        sh "dotnet ${scannerHome}/SonarScanner.MSBuild.dll end"
-                    }
-                }
-            }
-        }
         stage('Build') {
             steps {
                 echo 'Building the project...'

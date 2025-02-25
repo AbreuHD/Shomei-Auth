@@ -1,9 +1,11 @@
 ﻿using Auth.Infraestructure.Identity.DTOs.Account;
+using Auth.Infraestructure.Identity.DTOs.Geolocation;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -11,8 +13,43 @@ using System.Text;
 
 namespace Auth.Infraestructure.Identity.Extra
 {
-    public class ExtraMethods
+    public static class ExtraMethods
     {
+        internal static async Task<GeoLocationInfoDto?> GetGeoLocationInfo(string ipAddress, IHttpClientFactory _httpClientFactory)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                var response = await client.GetStringAsync($"https://ip.guide/{ipAddress}");
+
+                if (!string.IsNullOrEmpty(response))
+                {
+                    var geoInfo = JsonConvert.DeserializeObject<LocationInfoDto>(response);
+                    return geoInfo?.Location;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Manejo de errores si la solicitud falla
+                Console.WriteLine($"Error al obtener información de geolocalización: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        public static bool ValidateToken(string token, string storedHash)
+        {
+            var hashInput = HashToken(token);
+            return hashInput == storedHash;
+        }
+
+        public static string HashToken(string token)
+        {
+            var bytes = Encoding.UTF8.GetBytes(token);
+            var hash = SHA256.HashData(bytes);
+            return Convert.ToBase64String(hash);
+        }
+
         public static string RandomTokenString()
         {
             var randomBytes = new byte[40];
@@ -42,7 +79,7 @@ namespace Auth.Infraestructure.Identity.Extra
             return verificationUrl;
         }
 
-        internal static JwtSecurityToken GenerateJWToken(ApplicationUser user, JWTSettings _jwtSettings, IList<Claim> userClaims, IList<string> roles, int? profileId)
+        internal static JwtSecurityToken GenerateJWToken(ApplicationUser user, JwtSettings _jwtSettings, IList<Claim> userClaims, IList<string> roles, int? profileId)
         {
             var roleClaims = new List<Claim>();
             foreach (var role in roles)
@@ -51,12 +88,12 @@ namespace Auth.Infraestructure.Identity.Extra
             }
 
             var claims = new List<Claim>
-               {
-                   new(JwtRegisteredClaimNames.Sub, user.UserName),
-                   new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                   new(JwtRegisteredClaimNames.Email, user.Email),
-                   new("uid", user.Id),
-               }
+                   {
+                       new(JwtRegisteredClaimNames.Sub, user.UserName!),
+                       new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                       new(JwtRegisteredClaimNames.Email, user.Email!),
+                       new("uid", user.Id),
+                   }
             .Union(userClaims)
             .Union(roleClaims)
             .ToList();
@@ -74,6 +111,7 @@ namespace Auth.Infraestructure.Identity.Extra
                 expires: DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes),
                 signingCredentials: signCredentials
             );
+
             return jwtSecurityToken;
         }
     }

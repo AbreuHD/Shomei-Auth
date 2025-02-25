@@ -120,6 +120,43 @@ namespace Auth.Infraestructure.Identity.Migrations
                     b.ToTable("UserProfile", (string)null);
                 });
 
+            modelBuilder.Entity("Auth.Infraestructure.Identity.Entities.UserSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("Expiration")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("IpAddress")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserAgent")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserSession");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -263,6 +300,17 @@ namespace Auth.Infraestructure.Identity.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Auth.Infraestructure.Identity.Entities.UserSession", b =>
+                {
+                    b.HasOne("Auth.Infraestructure.Identity.Entities.ApplicationUser", "User")
+                        .WithMany("Sessions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -316,6 +364,8 @@ namespace Auth.Infraestructure.Identity.Migrations
 
             modelBuilder.Entity("Auth.Infraestructure.Identity.Entities.ApplicationUser", b =>
                 {
+                    b.Navigation("Sessions");
+
                     b.Navigation("UserProfile");
                 });
 #pragma warning restore 612, 618
