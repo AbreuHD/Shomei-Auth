@@ -36,3 +36,9 @@ Check out the full documentation to learn how to implement **Shōmei** in your p
 🔗 [**Shōmei Documentation**](https://shomei.abreuhd.com/)  
 
 ---
+
+### **☕ Buy Me a Coffee**  
+If you found **Shōmei** useful and would like to support the project, feel free to buy me a coffee!  
+
+<a href="https://www.buymeacoffee.com/abreuhd"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a pizza&emoji=🍕&slug=abreuhd&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" /></a>
+
