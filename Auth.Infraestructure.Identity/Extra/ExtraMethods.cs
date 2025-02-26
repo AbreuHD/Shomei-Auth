@@ -10,13 +10,11 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
 using MimeKit;
 using Newtonsoft.Json;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Security;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
 
 namespace Auth.Infraestructure.Identity.Extra
 {

@@ -26,12 +26,6 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.SendValidatio
         /// The origin of the request, typically used for creating the verification URL.
         /// </summary>
         public required string Origin { get; set; }
-
-        /// <summary>
-        /// Gets or sets the data transfer object (DTO) containing the required information 
-        /// for the email.
-        /// </summary>
-        //public required SendEmailPartialRequestDto EmailDto { get; set; }
     }
 
     internal class SendValidationEmailAgainCommandHandler(UserManager<ApplicationUser> userManager, MailSettings mailSettings) : IRequestHandler<SendValidationEmailAgainCommand, GenericApiResponse<string>>

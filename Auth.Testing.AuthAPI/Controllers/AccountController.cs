@@ -1,7 +1,5 @@
 using Auth.Infraestructure.Identity.DTOs.Account;
-using Auth.Infraestructure.Identity.DTOs.Email;
 using Auth.Infraestructure.Identity.DTOs.Password;
-using Auth.Infraestructure.Identity.Extra;
 using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
 using Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin;
 using Auth.Infraestructure.Identity.Features.Password.Commads;
@@ -16,8 +14,6 @@ using Auth.Testing.AuthAPI.ExtraConfig.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Net.Http;
 using System.Security.Cryptography;
 
 namespace Auth.Testing.AuthAPI.Controllers
@@ -47,7 +43,7 @@ namespace Auth.Testing.AuthAPI.Controllers
             var request = new CreateAccountCommand(Roles.User.ToString())
             {
                 Dto = requestDto,
-                ORIGIN = Request.Headers.Origin.ToString() ?? "Unknown"
+                Origin = Request.Headers.Origin.ToString() ?? "Unknown"
             };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);

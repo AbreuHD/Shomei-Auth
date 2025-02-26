@@ -3,6 +3,7 @@ using Auth.Infraestructure.Identity.DTOs.Email;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
+using Auth.Infraestructure.Identity.Mails;
 using Auth.Infraestructure.Identity.Settings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -41,13 +42,7 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
         /// <value>
         /// A string representing the origin URL for the verification email.
         /// </value>
-        public required string ORIGIN { get; set; }
-
-        /// <summary>
-        /// Gets or sets the data transfer object (DTO) containing the required information 
-        /// for the email.
-        /// </summary>
-        public SendEmailPartialRequestDto? EmailDto { get; set; }
+        public required string Origin { get; set; }
     }
     internal class CreateAccountCommandHandler(UserManager<ApplicationUser> userManager, MailSettings mailSettings) : IRequestHandler<CreateAccountCommand, GenericApiResponse<string>>
     {
@@ -119,17 +114,13 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
                 response.Payload = regiteredUser!.Id;
                 await _userManager.AddToRoleAsync(user, request.UserType);
 
-                var verificationUrl = await ExtraMethods.SendVerificationEMailUrl(user, request.ORIGIN, _userManager);
-
-                if (request.EmailDto != null)
+                var verificationUrl = await ExtraMethods.SendVerificationEMailUrl(user, request.Origin, _userManager);
+                await ExtraMethods.SendEmail(_mailSettings, new SendEmailRequestDto
                 {
-                    await ExtraMethods.SendEmail(_mailSettings, new SendEmailRequestDto
-                    {
-                        To = user.Email!,
-                        Body = request.EmailDto.Body,
-                        Subject = request.EmailDto.Subject
-                    });
-                }
+                    To = user.Email!,
+                    Body = ValidationEmailMail.GetEmailHtml(verificationUrl),
+                    Subject = "Confirm your email"
+                });
             }
             catch (Exception ex)
             {

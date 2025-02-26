@@ -6,11 +6,8 @@ using Auth.Infraestructure.Identity.Extra;
 using Auth.Infraestructure.Identity.Mails;
 using Auth.Infraestructure.Identity.Settings;
 using MediatR;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using System.Net.Http;
-using System.Security.Cryptography.Xml;
 
 namespace Auth.Infraestructure.Identity.Features.Password.Commads
 {
