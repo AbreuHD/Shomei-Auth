@@ -42,7 +42,6 @@
 
   <ItemGroup>
     <Folder Include="Features\ForgotPSW\" />
-    <Folder Include="Features\UserName\Commands\" />
   </ItemGroup>
 
   <ItemGroup>
