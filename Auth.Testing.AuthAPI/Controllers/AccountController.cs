@@ -47,7 +47,7 @@ namespace Auth.Testing.AuthAPI.Controllers
             var request = new CreateAccountCommand(Roles.User.ToString())
             {
                 Dto = requestDto,
-                ORIGIN = Request.Headers.Origin.ToString() ?? "Unknown"
+                Origin = Request.Headers.Origin.ToString() ?? "Unknown"
             };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
