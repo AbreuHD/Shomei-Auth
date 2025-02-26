@@ -1,8 +1,10 @@
 ﻿using Auth.Infraestructure.Identity.DTOs.Account;
+using Auth.Infraestructure.Identity.DTOs.Email;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
-using Auth.Infraestructure.Identity.Features.Email.Commands.SendEmail;
+using Auth.Infraestructure.Identity.Mails;
+using Auth.Infraestructure.Identity.Settings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -26,10 +28,11 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.SendValidatio
         public required string Origin { get; set; }
     }
 
-    internal class SendValidationEmailAgainCommandHandler(UserManager<ApplicationUser> userManager, IMediator mediator) : IRequestHandler<SendValidationEmailAgainCommand, GenericApiResponse<string>>
+    internal class SendValidationEmailAgainCommandHandler(UserManager<ApplicationUser> userManager, MailSettings mailSettings) : IRequestHandler<SendValidationEmailAgainCommand, GenericApiResponse<string>>
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
-        private IMediator Mediator { get; } = mediator;
+        private readonly MailSettings _mailSettings = mailSettings;
+
 
         public async Task<GenericApiResponse<string>> Handle(SendValidationEmailAgainCommand request, CancellationToken cancellationToken)
         {
@@ -60,12 +63,12 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.SendValidatio
                 }
 
                 var verificationUrl = await ExtraMethods.SendVerificationEMailUrl(user, request.Origin, _userManager);
-                await Mediator.Send(new SendEmailCommand
+                await ExtraMethods.SendEmail(_mailSettings, new SendEmailRequestDto
                 {
-                    To = user.Email,
-                    Body = $"Please confirm your account visiting this URL {verificationUrl}",
-                    Subject = "Confirm registration"
-                }, cancellationToken);
+                    To = user.Email!,
+                    Body = ValidationEmailMail.GetEmailHtml(verificationUrl),
+                    Subject = "Confirm your email"
+                });
             }
             catch (Exception ex)
             {

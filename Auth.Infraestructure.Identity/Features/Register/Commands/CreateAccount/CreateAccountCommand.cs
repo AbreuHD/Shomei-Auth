@@ -1,8 +1,10 @@
 ﻿using Auth.Infraestructure.Identity.DTOs.Account;
+using Auth.Infraestructure.Identity.DTOs.Email;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
-using Auth.Infraestructure.Identity.Features.Email.Commands.SendEmail;
+using Auth.Infraestructure.Identity.Mails;
+using Auth.Infraestructure.Identity.Settings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -40,12 +42,12 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
         /// <value>
         /// A string representing the origin URL for the verification email.
         /// </value>
-        public required string ORIGIN { get; set; }
+        public required string Origin { get; set; }
     }
-    internal class CreateAccountCommandHandler(UserManager<ApplicationUser> userManager, IMediator mediator) : IRequestHandler<CreateAccountCommand, GenericApiResponse<string>>
+    internal class CreateAccountCommandHandler(UserManager<ApplicationUser> userManager, MailSettings mailSettings) : IRequestHandler<CreateAccountCommand, GenericApiResponse<string>>
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
-        private IMediator Mediator { get; } = mediator;
+        private readonly MailSettings _mailSettings = mailSettings;
 
         public async Task<GenericApiResponse<string>> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
         {
@@ -112,14 +114,13 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
                 response.Payload = regiteredUser!.Id;
                 await _userManager.AddToRoleAsync(user, request.UserType);
 
-                var verificationUrl = await ExtraMethods.SendVerificationEMailUrl(user, request.ORIGIN, _userManager);
-
-                await Mediator.Send(new SendEmailCommand
+                var verificationUrl = await ExtraMethods.SendVerificationEMailUrl(user, request.Origin, _userManager);
+                await ExtraMethods.SendEmail(_mailSettings, new SendEmailRequestDto
                 {
-                    To = user.Email,
-                    Body = $"Please confirm your account visiting this URL {verificationUrl}",
-                    Subject = "Confirm registration"
-                }, cancellationToken);
+                    To = user.Email!,
+                    Body = ValidationEmailMail.GetEmailHtml(verificationUrl),
+                    Subject = "Confirm your email"
+                });
             }
             catch (Exception ex)
             {

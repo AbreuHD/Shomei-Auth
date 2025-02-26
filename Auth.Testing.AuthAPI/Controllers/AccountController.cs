@@ -1,6 +1,8 @@
 using Auth.Infraestructure.Identity.DTOs.Account;
+using Auth.Infraestructure.Identity.DTOs.Password;
 using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
 using Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin;
+using Auth.Infraestructure.Identity.Features.Password.Commads;
 using Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount;
 using Auth.Infraestructure.Identity.Features.Register.Commands.SendValidationEmailAgain;
 using Auth.Infraestructure.Identity.Features.UserProfile.Commands;
@@ -12,7 +14,6 @@ using Auth.Testing.AuthAPI.ExtraConfig.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Security.Cryptography;
 
 namespace Auth.Testing.AuthAPI.Controllers
@@ -42,7 +43,7 @@ namespace Auth.Testing.AuthAPI.Controllers
             var request = new CreateAccountCommand(Roles.User.ToString())
             {
                 Dto = requestDto,
-                ORIGIN = Request.Headers.Origin.ToString() ?? "Unknown"
+                Origin = Request.Headers.Origin.ToString() ?? "Unknown"
             };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
@@ -62,6 +63,7 @@ namespace Auth.Testing.AuthAPI.Controllers
         [HttpPost("ResentConfirmation")]
         public async Task<IActionResult> ResentConfirmation([FromBody] SendValidationEmailAgainRequestDto requestDto)
         {
+
             var request = new SendValidationEmailAgainCommand
             {
                 Dto = requestDto,
@@ -180,6 +182,21 @@ namespace Auth.Testing.AuthAPI.Controllers
             var request = new GetAllUserSessionsQuery()
             {
                 UserId = User.FindFirst("uid")!.Value,
+            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
+        }
+
+        [HttpPut("ChangePassword")]
+        [MultipleSessionAuthorize]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto requestDto)
+        {
+            var request = new ChangePasswordCommand()
+            {
+                Dto = requestDto,
+                UserId = User.FindFirst("uid")!.Value,
+                IpAdress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
+                UserAgent = Request.Headers.UserAgent.ToString()
             };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
