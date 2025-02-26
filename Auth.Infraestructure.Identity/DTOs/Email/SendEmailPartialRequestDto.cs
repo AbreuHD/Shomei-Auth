@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Auth.Infraestructure.Identity.DTOs.Email
+﻿namespace Auth.Infraestructure.Identity.DTOs.Email
 {
     public class SendEmailPartialRequestDto
     {

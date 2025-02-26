@@ -31,7 +31,7 @@ namespace Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthE
 
         public async Task<GenericApiResponse<string>> Handle(AuthEmailCommand request, CancellationToken cancellationToken)
         {
-            var response = new GenericApiResponse<string>() 
+            var response = new GenericApiResponse<string>()
             {
                 Success = false,
                 Statuscode = StatusCodes.Status500InternalServerError,
