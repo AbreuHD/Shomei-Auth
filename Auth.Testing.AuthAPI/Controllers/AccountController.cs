@@ -5,6 +5,7 @@ using Auth.Infraestructure.Identity.DTOs.Password;
 using Auth.Infraestructure.Identity.DTOs.UserName;
 using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
 using Auth.Infraestructure.Identity.Features.Email.Commands;
+using Auth.Infraestructure.Identity.Features.ForgotPSW.Commands;
 using Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin;
 using Auth.Infraestructure.Identity.Features.Password.Commads;
 using Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount;
@@ -257,6 +258,20 @@ namespace Auth.Testing.AuthAPI.Controllers
                 Dto = requestDto,
                 UserId = User.FindFirst("uid")!.Value,
                 UseOtp = true
+            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
+        }
+
+        [HttpPut("GeneratePasswordResetOtp")]
+        [Authorize]
+        public async Task<IActionResult> GeneratePasswordResetOtp(PasswordChangeOtpRequestDto requestDto)
+        {
+            var request = new GeneratePasswordResetOtpCommand()
+            {
+                Dto = requestDto,
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
+                UserAgent = Request.Headers.UserAgent.ToString()
             };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
