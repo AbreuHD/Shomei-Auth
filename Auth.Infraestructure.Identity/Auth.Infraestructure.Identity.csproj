@@ -41,10 +41,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\ForgotPSW\Commands\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="..\ico.jpg">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
