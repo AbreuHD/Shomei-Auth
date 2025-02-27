@@ -15,6 +15,7 @@ namespace Auth.Infraestructure.Identity.Context
             builder.Entity<IdentityRole>(entity => entity.ToTable("Roles"));
             builder.Entity<IdentityUserRole<string>>(entity => entity.ToTable("UserRoles"));
             builder.Entity<UserProfile>(entity => entity.ToTable("UserProfile"));
+            builder.Entity<MailOtp>(entity => entity.ToTable("MailOtp"));
 
             builder.Entity<UserProfile>()
                 .HasOne(p => p.User)
@@ -25,6 +26,12 @@ namespace Auth.Infraestructure.Identity.Context
             builder.Entity<UserSession>()
                 .HasOne(us => us.User)
                 .WithMany(u => u.Sessions)
+                .HasForeignKey(us => us.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<MailOtp>()
+                .HasOne(us => us.User)
+                .WithMany(u => u.MailOtp)
                 .HasForeignKey(us => us.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }

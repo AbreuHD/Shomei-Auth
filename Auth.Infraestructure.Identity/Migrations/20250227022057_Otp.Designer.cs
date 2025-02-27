@@ -4,6 +4,7 @@ using Auth.Infraestructure.Identity.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Auth.Infraestructure.Identity.Migrations
 {
     [DbContext(typeof(IdentityContext))]
-    partial class IdentityContextModelSnapshot : ModelSnapshot
+    [Migration("20250227022057_Otp")]
+    partial class Otp
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -96,11 +99,12 @@ namespace Auth.Infraestructure.Identity.Migrations
 
             modelBuilder.Entity("Auth.Infraestructure.Identity.Entities.MailOtp", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("ExpirationDate")
                         .HasColumnType("datetime(6)");
@@ -113,7 +117,7 @@ namespace Auth.Infraestructure.Identity.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<bool?>("Used")
+                    b.Property<bool>("Used")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("UserAgent")
@@ -128,7 +132,7 @@ namespace Auth.Infraestructure.Identity.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("MailOtp", (string)null);
+                    b.ToTable("MailOtp");
                 });
 
             modelBuilder.Entity("Auth.Infraestructure.Identity.Entities.UserProfile", b =>
