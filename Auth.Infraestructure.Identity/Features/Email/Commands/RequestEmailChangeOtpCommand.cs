@@ -9,12 +9,6 @@ using Auth.Infraestructure.Identity.Settings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Auth.Infraestructure.Identity.Features.Email.Commands
 {
@@ -25,7 +19,7 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands
         public required string IpAddress { get; set; }
         public required string UserAgent { get; set; }
     }
-    internal class RequestEmailChangeOtpCommandHandler(IdentityContext identityContext, 
+    internal class RequestEmailChangeOtpCommandHandler(IdentityContext identityContext,
         UserManager<ApplicationUser> userManager,
         MailSettings mailSettings,
         IHttpClientFactory httpClientFactory) : IRequestHandler<RequestEmailChangeOtpCommand, GenericApiResponse<bool>>

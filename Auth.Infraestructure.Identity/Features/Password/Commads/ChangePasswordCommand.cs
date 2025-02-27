@@ -1,5 +1,5 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Mail;
-using Auth.Infraestructure.Identity.DTOs.Generic;
+﻿using Auth.Infraestructure.Identity.DTOs.Generic;
+using Auth.Infraestructure.Identity.DTOs.Mail;
 using Auth.Infraestructure.Identity.DTOs.Password;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
