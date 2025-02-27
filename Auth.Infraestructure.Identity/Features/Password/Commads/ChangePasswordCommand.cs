@@ -1,4 +1,4 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Email;
+﻿using Auth.Infraestructure.Identity.DTOs.Mail;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.DTOs.Password;
 using Auth.Infraestructure.Identity.Entities;

@@ -1,7 +1,15 @@
-﻿namespace Auth.Infraestructure.Identity.DTOs.Email
+﻿namespace Auth.Infraestructure.Identity.DTOs.Mail
 {
-    public class SendEmailPartialRequestDto
+    public class SendEmailRequestDto
     {
+        /// <summary>
+        /// The recipient's email address.
+        /// </summary>
+        /// <value>
+        /// A string representing the email address of the recipient.
+        /// </value>
+        public required string To { get; set; }
+
         /// <summary>
         /// The subject of the email.
         /// </summary>

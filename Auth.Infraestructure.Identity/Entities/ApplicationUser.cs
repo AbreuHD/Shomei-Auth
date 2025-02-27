@@ -9,5 +9,6 @@ namespace Auth.Infraestructure.Identity.Entities
 
         public ICollection<UserProfile>? UserProfile { get; set; } = [];
         public ICollection<UserSession> Sessions { get; set; } = [];
+        public ICollection<MailOtp> MailOtp { get; set; } = [];
     }
 }
