@@ -256,6 +256,7 @@ namespace Auth.Testing.AuthAPI.Controllers
             {
                 Dto = requestDto,
                 UserId = User.FindFirst("uid")!.Value,
+                UseOtp = true
             };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);

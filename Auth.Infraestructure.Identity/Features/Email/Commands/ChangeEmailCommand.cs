@@ -14,6 +14,7 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands
     {
         public required ChangeEmailRequestDto Dto { get; set; }
         public required string UserId { get; set; }
+        public bool UseOtp { get; set; } = false;
     }
 
     internal class ChangeEmailCommandHandler(UserManager<ApplicationUser> userManager,
@@ -49,7 +50,7 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands
                     return response;
                 }
 
-                if (request.Dto.Otp is not null)
+                if (request.Dto.Otp is not null && request.UseOtp)
                 {
                     var otpCheckResponse = await ValidateOtpWithEmail(response, request);
                     if (!otpCheckResponse.Success)
