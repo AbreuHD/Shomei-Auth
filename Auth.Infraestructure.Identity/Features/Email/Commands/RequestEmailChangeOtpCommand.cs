@@ -64,7 +64,7 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands
                     UserAgent = request.UserAgent,
                     IpAddress = request.IpAddress
                 });
-                await _identityContext.SaveChangesAsync();
+                await _identityContext.SaveChangesAsync(cancellationToken);
 
                 var geoInfo = await ExtraMethods.GetGeoLocationInfo(request.IpAddress, _httpClientFactory);
                 await ExtraMethods.SendEmail(_mailSettings, new SendEmailRequestDto
