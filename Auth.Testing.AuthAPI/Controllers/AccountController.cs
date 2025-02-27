@@ -250,9 +250,9 @@ namespace Auth.Testing.AuthAPI.Controllers
 
         [HttpPut("ChangeEmailWithOtp")]
         [Authorize]
-        public async Task<IActionResult> ChangeEmailWithOtp(ChangeEmailWithOtpRequestDto requestDto)
+        public async Task<IActionResult> ChangeEmailWithOtp(ChangeEmailRequestDto requestDto)
         {
-            var request = new ChangeEmailWithOtpCommand()
+            var request = new ChangeEmailCommand()
             {
                 Dto = requestDto,
                 UserId = User.FindFirst("uid")!.Value,
