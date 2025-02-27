@@ -41,7 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\ForgotPSW\" />
+    <Folder Include="Features\ForgotPSW\Commands\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,6 +3,7 @@ using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.DTOs.Mail;
 using Auth.Infraestructure.Identity.DTOs.Otp;
 using Auth.Infraestructure.Identity.Entities;
+using Auth.Infraestructure.Identity.Enums;
 using Auth.Infraestructure.Identity.Extra;
 using Auth.Infraestructure.Identity.Mails;
 using Auth.Infraestructure.Identity.Settings;
@@ -60,9 +61,10 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands
                 {
                     UserId = user.Id,
                     Otp = ExtraMethods.HashToken(Otp),
-                    ExpirationDate = DateTime.UtcNow.AddMinutes(15),
+                    Expiration = DateTime.UtcNow.AddMinutes(15),
                     UserAgent = request.UserAgent,
-                    IpAddress = request.IpAddress
+                    IpAddress = request.IpAddress,
+                    Purpose = OtpPurpose.ChangeEmail.ToString()
                 });
                 await _identityContext.SaveChangesAsync(cancellationToken);
 

@@ -2,6 +2,7 @@
 using Auth.Infraestructure.Identity.DTOs.Email;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
+using Auth.Infraestructure.Identity.Enums;
 using Auth.Infraestructure.Identity.Extra;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -92,7 +93,9 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands
         private async Task<GenericApiResponse<bool>> ValidateOtpWithEmail(GenericApiResponse<bool> response, ChangeEmailCommand request)
         {
             var otpRecord = await _identityContext.Set<MailOtp>()
-                .Where(x => x.UserId == request.UserId && x.Otp == ExtraMethods.HashToken(request.Dto.Otp!))
+                .Where(x => x.UserId == request.UserId 
+                    && x.Otp == ExtraMethods.HashToken(request.Dto.Otp!) 
+                    && x.Purpose == OtpPurpose.ChangeEmail.ToString())
                 .FirstOrDefaultAsync();
 
             if (otpRecord == null)
@@ -102,7 +105,7 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands
                 return response;
             }
 
-            if (otpRecord.ExpirationDate < DateTime.UtcNow)
+            if (otpRecord.Expiration < DateTime.UtcNow)
             {
                 response.Message = "OTP has expired";
                 response.Statuscode = StatusCodes.Status406NotAcceptable;
