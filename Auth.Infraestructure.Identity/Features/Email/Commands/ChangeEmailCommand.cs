@@ -1,34 +1,22 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.DTOs.UserName;
+﻿using Auth.Infraestructure.Identity.DTOs.Email;
+using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
-namespace Auth.Infraestructure.Identity.Features.UserName.Commands
+namespace Auth.Infraestructure.Identity.Features.Email.Commands
 {
-    /// <summary>
-    /// Represents a command to change a user's username.
-    /// This command is processed by the corresponding handler.
-    /// </summary>
-    public class ChangeUserNameCommand : IRequest<GenericApiResponse<bool>>
+    public class ChangeEmailCommand : IRequest<GenericApiResponse<bool>>
     {
-        /// <summary>
-        /// Gets or sets the unique identifier of the user requesting the username change.
-        /// This ID is used to retrieve the user from the identity system.
-        /// </summary>
+        public required ChangeEmailRequestDto Dto { get; set; }
         public required string UserId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the data transfer object (DTO) containing the new username details.
-        /// </summary>
-        public required ChangeUserNameRequestDto Dto { get; set; }
     }
-    internal class ChangeUserNameCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<ChangeUserNameCommand, GenericApiResponse<bool>>
+    internal class ChangeEmailCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<ChangeEmailCommand, GenericApiResponse<bool>>
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
 
-        public async Task<GenericApiResponse<bool>> Handle(ChangeUserNameCommand request, CancellationToken cancellationToken)
+        public async Task<GenericApiResponse<bool>> Handle(ChangeEmailCommand request, CancellationToken cancellationToken)
         {
             var response = new GenericApiResponse<bool>()
             {
@@ -46,11 +34,11 @@ namespace Auth.Infraestructure.Identity.Features.UserName.Commands
                     response.Statuscode = StatusCodes.Status404NotFound;
                     return response;
                 }
-                var UserNameExist = await _userManager.FindByNameAsync(request.Dto.NewUserName);
+                var UserNameExist = await _userManager.FindByEmailAsync(request.Dto.NewEmail);
                 if (UserNameExist != null)
                 {
                     response.Success = false;
-                    response.Message = $"Username {request.Dto.NewUserName} is already taken";
+                    response.Message = $"Email {request.Dto.NewEmail} is already taken";
                     response.Statuscode = StatusCodes.Status406NotAcceptable;
                     return response;
                 }
@@ -61,13 +49,13 @@ namespace Auth.Infraestructure.Identity.Features.UserName.Commands
                     response.Statuscode = StatusCodes.Status406NotAcceptable;
                     return response;
                 }
-                var result = await _userManager.SetUserNameAsync(user, request.Dto.NewUserName);
+                var result = await _userManager.SetEmailAsync(user, request.Dto.NewEmail);
                 if (result.Succeeded)
                 {
                     response.Payload = true;
                     response.Success = true;
                     response.Statuscode = StatusCodes.Status200OK;
-                    response.Message = "Username changed successfully.";
+                    response.Message = "Email changed successfully.";
                 }
                 else
                 {

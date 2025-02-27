@@ -1,6 +1,6 @@
 ﻿using Auth.Infraestructure.Identity.DTOs.Account;
-using Auth.Infraestructure.Identity.DTOs.Email;
 using Auth.Infraestructure.Identity.DTOs.Geolocation;
+using Auth.Infraestructure.Identity.DTOs.Mail;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Settings;
 using MailKit.Net.Smtp;
@@ -75,6 +75,13 @@ namespace Auth.Infraestructure.Identity.Extra
             }
 
             return null;
+        }
+
+        internal static string GenerateOtp()
+        {
+            const string Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var Otp = new string([.. Enumerable.Range(0, 6).Select(_ => Characters[RandomNumberGenerator.GetInt32(Characters.Length)])]);
+            return Otp;
         }
 
         internal static string HashToken(string token)

@@ -1,7 +1,10 @@
 using Auth.Infraestructure.Identity.DTOs.Account;
+using Auth.Infraestructure.Identity.DTOs.Email;
+using Auth.Infraestructure.Identity.DTOs.Otp;
 using Auth.Infraestructure.Identity.DTOs.Password;
 using Auth.Infraestructure.Identity.DTOs.UserName;
 using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
+using Auth.Infraestructure.Identity.Features.Email.Commands;
 using Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin;
 using Auth.Infraestructure.Identity.Features.Password.Commads;
 using Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount;
@@ -209,6 +212,47 @@ namespace Auth.Testing.AuthAPI.Controllers
         public async Task<IActionResult> ChangeUserName(ChangeUserNameRequestDto requestDto)
         {
             var request = new ChangeUserNameCommand()
+            {
+                Dto = requestDto,
+                UserId = User.FindFirst("uid")!.Value,
+            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
+        }
+
+        [HttpPut("ChangeEmail")]
+        [Authorize]
+        public async Task<IActionResult> ChangeEmail(ChangeEmailRequestDto requestDto)
+        {
+            var request = new ChangeEmailCommand()
+            {
+                Dto = requestDto,
+                UserId = User.FindFirst("uid")!.Value,
+            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
+        }
+
+        [HttpPut("RequestEmailChangeOtp")]
+        [Authorize]
+        public async Task<IActionResult> RequestEmailChangeOtp(EmailChangeOtpRequestDto requestDto)
+        {
+            var request = new RequestEmailChangeOtpCommand()
+            {
+                Dto = requestDto,
+                UserId = User.FindFirst("uid")!.Value,
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
+                UserAgent = Request.Headers.UserAgent.ToString()
+            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
+        }
+
+        [HttpPut("ChangeEmailWithOtp")]
+        [Authorize]
+        public async Task<IActionResult> ChangeEmailWithOtp(ChangeEmailWithOtpRequestDto requestDto)
+        {
+            var request = new ChangeEmailWithOtpCommand()
             {
                 Dto = requestDto,
                 UserId = User.FindFirst("uid")!.Value,
