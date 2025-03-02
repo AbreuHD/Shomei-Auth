@@ -1,22 +1,27 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Email;
+﻿using Auth.Infraestructure.Identity.Context;
+using Auth.Infraestructure.Identity.DTOs.Email;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
+using Auth.Infraestructure.Identity.Enums;
+using Auth.Infraestructure.Identity.Otp;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
 namespace Auth.Infraestructure.Identity.Features.Email.Commands
 {
-    public class ChangeEmailCommand : IRequest<GenericApiResponse<bool>>
+    public class ChangeEmailWithOtpCommand : IRequest<GenericApiResponse<bool>>
     {
-        public required ChangeEmailRequestDto Dto { get; set; }
+        public required ChangeEmailWithOtpRequestDto Dto { get; set; }
         public required string UserId { get; set; }
     }
-    internal class ChangeEmailCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<ChangeEmailCommand, GenericApiResponse<bool>>
+    internal class ChangeEmailWithOtpCommandHandler(UserManager<ApplicationUser> userManager,
+            IdentityContext identityContext) : IRequestHandler<ChangeEmailWithOtpCommand, GenericApiResponse<bool>>
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
+        private readonly IdentityContext _identityContext = identityContext;
 
-        public async Task<GenericApiResponse<bool>> Handle(ChangeEmailCommand request, CancellationToken cancellationToken)
+        public async Task<GenericApiResponse<bool>> Handle(ChangeEmailWithOtpCommand request, CancellationToken cancellationToken)
         {
             var response = new GenericApiResponse<bool>()
             {
@@ -42,13 +47,13 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands
                     response.Statuscode = StatusCodes.Status406NotAcceptable;
                     return response;
                 }
-                var passwordCheck = await _userManager.CheckPasswordAsync(user, request.Dto.Password!);
-                if (!passwordCheck)
+
+                var otpCheckResponse = await ValidateOtpEmail.ValidateOtpWithEmail(response, request.Dto.Otp, user.Id, OtpPurpose.ChangeEmail.ToString(), _identityContext);
+                if (!otpCheckResponse.Success)
                 {
-                    response.Message = "Password is incorrect";
-                    response.Statuscode = StatusCodes.Status406NotAcceptable;
-                    return response;
+                    return otpCheckResponse;
                 }
+
                 var result = await _userManager.SetEmailAsync(user, request.Dto.NewEmail);
                 if (result.Succeeded)
                 {

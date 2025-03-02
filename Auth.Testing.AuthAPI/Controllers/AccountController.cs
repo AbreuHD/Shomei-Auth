@@ -251,13 +251,12 @@ namespace Auth.Testing.AuthAPI.Controllers
 
         [HttpPut("ChangeEmailWithOtp")]
         [Authorize]
-        public async Task<IActionResult> ChangeEmailWithOtp(ChangeEmailRequestDto requestDto)
+        public async Task<IActionResult> ChangeEmailWithOtp(ChangeEmailWithOtpRequestDto requestDto)
         {
-            var request = new ChangeEmailCommand()
+            var request = new ChangeEmailWithOtpCommand()
             {
                 Dto = requestDto,
                 UserId = User.FindFirst("uid")!.Value,
-                UseOtp = true
             };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);

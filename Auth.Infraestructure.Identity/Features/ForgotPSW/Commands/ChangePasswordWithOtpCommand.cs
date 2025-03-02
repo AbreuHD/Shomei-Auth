@@ -7,6 +7,7 @@ using Auth.Infraestructure.Identity.Enums;
 using Auth.Infraestructure.Identity.Extra;
 using Auth.Infraestructure.Identity.Features.Email.Commands;
 using Auth.Infraestructure.Identity.Mails;
+using Auth.Infraestructure.Identity.Otp;
 using Auth.Infraestructure.Identity.Settings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -55,7 +56,7 @@ namespace Auth.Infraestructure.Identity.Features.ForgotPSW.Commands
                 return response;
             }
 
-            var otpCheckResponse = await ValidateOtpWithEmail(response, request.Dto.Otp, user.Id);
+            var otpCheckResponse = await ValidateOtpEmail.ValidateOtpWithEmail(response, request.Dto.Otp, user.Id, OtpPurpose.PasswordReset.ToString(), _identityContext);
             if (!otpCheckResponse.Success)
             {
                 return otpCheckResponse;
@@ -104,42 +105,6 @@ namespace Auth.Infraestructure.Identity.Features.ForgotPSW.Commands
                 response.Statuscode = StatusCodes.Status406NotAcceptable;
             }
 
-            return response;
-        }
-        private async Task<GenericApiResponse<bool>> ValidateOtpWithEmail(GenericApiResponse<bool> response, string otp, string userId)
-        {
-            var otpRecord = await _identityContext.Set<MailOtp>()
-                .Where(x => x.UserId == userId
-                    && x.Otp == ExtraMethods.HashToken(otp)
-                    && x.Purpose == OtpPurpose.PasswordReset.ToString())
-                .FirstOrDefaultAsync();
-
-            if (otpRecord == null)
-            {
-                response.Message = "Invalid OTP";
-                response.Statuscode = StatusCodes.Status406NotAcceptable;
-                return response;
-            }
-
-            if (otpRecord.Expiration < DateTime.UtcNow)
-            {
-                response.Message = "OTP has expired";
-                response.Statuscode = StatusCodes.Status406NotAcceptable;
-                return response;
-            }
-
-            if (otpRecord.Used == true)
-            {
-                response.Message = "OTP has already been used";
-                response.Statuscode = StatusCodes.Status406NotAcceptable;
-                return response;
-            }
-
-            otpRecord.Used = true;
-            _identityContext.Entry(otpRecord).Property(o => o.Used).IsModified = true;
-            await _identityContext.SaveChangesAsync();
-
-            response.Success = true;
             return response;
         }
     }
