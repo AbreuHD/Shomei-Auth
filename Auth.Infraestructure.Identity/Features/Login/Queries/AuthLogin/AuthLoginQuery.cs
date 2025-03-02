@@ -1,13 +1,17 @@
 ﻿using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.DTOs.Generic;
+using Auth.Infraestructure.Identity.DTOs.Mail;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
+using Auth.Infraestructure.Identity.Mails;
+using Auth.Infraestructure.Identity.Migrations;
 using Auth.Infraestructure.Identity.Settings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 
 
@@ -44,12 +48,19 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
         public required string IpAdress { get; set; }
     }
 
-    internal class AuthLoginQueryHandler(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, IdentityContext identityContext)
+    internal class AuthLoginQueryHandler(UserManager<ApplicationUser> userManager, 
+        SignInManager<ApplicationUser> signInManager, 
+        IConfiguration configuration, 
+        IdentityContext identityContext,
+        IHttpClientFactory _httpClientFactory,
+        MailSettings _mailSettings)
+
         : IRequestHandler<AuthLoginQuery, GenericApiResponse<AuthenticationResponse>>
     {
         private readonly IdentityContext _identityContext = identityContext;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
+
         private readonly JwtSettings _jwtSettings
             = new()
             {
@@ -57,7 +68,9 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
                 Issuer = Environment.GetEnvironmentVariable("Issuer") ?? configuration["JWTSettings:Issuer"] ?? string.Empty,
                 Key = Environment.GetEnvironmentVariable("Key") ?? configuration["JWTSettings:Key"] ?? string.Empty,
                 UseDifferentProfiles = bool.Parse(Environment.GetEnvironmentVariable("UseDifferentProfiles") ?? configuration["JWTSettings:UseDifferentProfiles"] ?? "0"),
-                DurationInMinutes = int.Parse(Environment.GetEnvironmentVariable("DurationInMinutes") ?? configuration["JWTSettings:DurationInMinutes"] ?? "0")
+                DurationInMinutes = int.Parse(Environment.GetEnvironmentVariable("DurationInMinutes") ?? configuration["JWTSettings:DurationInMinutes"] ?? "0"),
+                MaxFailedAccessAttempts = int.Parse(Environment.GetEnvironmentVariable("MaxFailedAccessAttempts") ?? configuration["JWTSettings:MaxFailedAccessAttempts"] ?? "10"),
+                DefaultLockoutTimeSpan = int.Parse(Environment.GetEnvironmentVariable("DefaultLockoutTimeSpan") ?? configuration["JWTSettings:DefaultLockoutTimeSpan"] ?? "30")
             };
 
         public async Task<GenericApiResponse<AuthenticationResponse>> Handle(AuthLoginQuery request, CancellationToken cancellationToken)
@@ -91,7 +104,47 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
                     response.Statuscode = StatusCodes.Status404NotFound;
                     return response;
                 }
-                var result = await _signInManager.PasswordSignInAsync(User.UserName!, request.Dto.Password, false, lockoutOnFailure: false);
+                bool isFinalAttempt = User.AccessFailedCount == (_jwtSettings.MaxFailedAccessAttempts - 1);
+
+                var result = await _signInManager.PasswordSignInAsync(User.UserName!, request.Dto.Password, false, lockoutOnFailure: true);
+
+                if (result.IsLockedOut && isFinalAttempt)
+                {
+                    var blockEmail = new AccountLockEmail()
+                    {
+                        UserName = User.UserName!,
+                        Ip = request.IpAdress,
+                        Country = (await ExtraMethods.GetGeoLocationInfo(request.IpAdress, _httpClientFactory))?.Country ?? "Unknown",
+                        UserAgent = request.UserAgent,
+                        LockDuration = $"{_jwtSettings.DefaultLockoutTimeSpan} minutes"
+                    };
+
+                    await ExtraMethods.SendEmail(_mailSettings, new SendEmailRequestDto
+                    {
+                        To = User.Email!,
+                        Body = blockEmail.GetEmailHtml(),
+                        Subject = "Confirm your email"
+                    });
+
+                    response.Success = false;
+                    response.Message = $"Account has been locked for multiple failed attempts. Please try again in {_jwtSettings.DefaultLockoutTimeSpan} minutes.";
+                    response.Statuscode = StatusCodes.Status423Locked;
+                    return response;
+                }
+                if (result.IsLockedOut)
+                {
+                    response.Success = false;
+                    response.Message = $"Account Locked/Banned until {User.LockoutEnd}";
+                    response.Statuscode = StatusCodes.Status423Locked;
+                    return response;
+                }
+                if (result.RequiresTwoFactor)
+                {
+                    response.Success = false;
+                    response.Message = $"Two Factor Authentication Required";
+                    response.Statuscode = StatusCodes.Status401Unauthorized;
+                    return response;
+                }
                 if (!result.Succeeded)
                 {
                     response.Success = false;
