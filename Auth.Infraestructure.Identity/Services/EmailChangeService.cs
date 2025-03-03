@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Auth.Infraestructure.Identity.Services
 {
-    public class EmailChangeService(UserManager<ApplicationUser> userManager, IdentityContext? identityContext = null)
+    internal class EmailChangeService(UserManager<ApplicationUser> userManager, IdentityContext? identityContext = null)
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly IdentityContext? _identityContext = identityContext;

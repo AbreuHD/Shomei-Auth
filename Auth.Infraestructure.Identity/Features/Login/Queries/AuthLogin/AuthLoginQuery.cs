@@ -108,6 +108,14 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
 
                 var result = await _signInManager.PasswordSignInAsync(User.UserName!, request.Dto.Password, false, lockoutOnFailure: true);
 
+                if (User.IsBanned == true)
+                {
+                    response.Success = false;
+                    response.Message = $"Account Banned unitl {User.LockoutEnd}";
+                    response.Statuscode = StatusCodes.Status401Unauthorized;
+                    return response;
+                }
+
                 if (result.IsLockedOut && isFinalAttempt)
                 {
                     var blockEmail = new AccountLockEmail()
