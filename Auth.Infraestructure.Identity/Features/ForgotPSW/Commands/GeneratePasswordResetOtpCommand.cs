@@ -1,7 +1,7 @@
 ﻿using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.DTOs.Mail;
-using Auth.Infraestructure.Identity.DTOs.Otp;
+using Auth.Infraestructure.Identity.DTOs.Password;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Enums;
 using Auth.Infraestructure.Identity.Extra;
@@ -11,26 +11,25 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
-namespace Auth.Infraestructure.Identity.Features.Email.Commands
+namespace Auth.Infraestructure.Identity.Features.ForgotPSW.Commands
 {
-    public class RequestEmailChangeOtpCommand : IRequest<GenericApiResponse<bool>>
+    public class GeneratePasswordResetOtpCommand : IRequest<GenericApiResponse<bool>>
     {
-        public required EmailChangeOtpRequestDto Dto { get; set; }
-        public required string UserId { get; set; }
+        public required PasswordChangeOtpRequestDto Dto { get; set; }
         public required string IpAddress { get; set; }
         public required string UserAgent { get; set; }
     }
-    internal class RequestEmailChangeOtpCommandHandler(IdentityContext identityContext,
+    internal class GeneratePasswordResetOtpCommandHandler(IdentityContext identityContext,
         UserManager<ApplicationUser> userManager,
         MailSettings mailSettings,
-        IHttpClientFactory httpClientFactory) : IRequestHandler<RequestEmailChangeOtpCommand, GenericApiResponse<bool>>
+        IHttpClientFactory httpClientFactory) : IRequestHandler<GeneratePasswordResetOtpCommand, GenericApiResponse<bool>>
     {
         private readonly IdentityContext _identityContext = identityContext;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly MailSettings _mailSettings = mailSettings;
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
-        public async Task<GenericApiResponse<bool>> Handle(RequestEmailChangeOtpCommand request, CancellationToken cancellationToken)
+        public async Task<GenericApiResponse<bool>> Handle(GeneratePasswordResetOtpCommand request, CancellationToken cancellationToken)
         {
             var response = new GenericApiResponse<bool>()
             {
@@ -41,18 +40,11 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands
             };
             try
             {
-                var user = await _userManager.FindByIdAsync(request.UserId);
+                var user = await _userManager.FindByEmailAsync(request.Dto.Email);
                 if (user == null)
                 {
-                    response.Message = "User not found.";
+                    response.Message = "User with that email not found.";
                     response.Statuscode = StatusCodes.Status404NotFound;
-                    return response;
-                }
-                var passwordCheck = await _userManager.CheckPasswordAsync(user, request.Dto.Password);
-                if (!passwordCheck)
-                {
-                    response.Message = "Password is incorrect";
-                    response.Statuscode = StatusCodes.Status406NotAcceptable;
                     return response;
                 }
 
@@ -64,29 +56,21 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands
                     Expiration = DateTime.UtcNow.AddMinutes(15),
                     UserAgent = request.UserAgent,
                     IpAddress = request.IpAddress,
-                    Purpose = OtpPurpose.ChangeEmail.ToString()
+                    Purpose = OtpPurpose.PasswordReset.ToString()
                 });
                 await _identityContext.SaveChangesAsync(cancellationToken);
 
                 var geoInfo = await ExtraMethods.GetGeoLocationInfo(request.IpAddress, _httpClientFactory);
-                var passwordEmail = new PasswordResetEmail
-                {
-                    UserName = user.UserName!,
-                    OtpCode = Otp,
-                    Ip = request.IpAddress,
-                    Country = geoInfo?.Country ?? "",
-                    UserAgent = request.UserAgent
-                };
                 await ExtraMethods.SendEmail(_mailSettings, new SendEmailRequestDto
                 {
                     To = user.Email!,
-                    Body = passwordEmail.GetEmailHtml(),
-                    Subject = "Confirm your email"
+                    Body = ChangeEmailOtp.GetEmailHtml(user.UserName!, Otp, request.IpAddress, geoInfo?.Country ?? "", request.UserAgent),
+                    Subject = "Password Reset"
                 });
 
                 response.Statuscode = StatusCodes.Status200OK;
                 response.Success = true;
-                response.Message = "Email change OTP sent successfully.";
+                response.Message = "Password Reset OTP sent successfully.";
                 response.Payload = true;
             }
             catch (Exception ex)

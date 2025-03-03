@@ -40,6 +40,14 @@ namespace Auth.Infraestructure.Identity
                 option.LoginPath = "/Account";
                 option.AccessDeniedPath = "/User/AccessDenied";
             });
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(int.Parse(configuration["JWTSettings:DefaultLockoutTimeSpan"] ?? "30"));
+                options.Lockout.MaxFailedAccessAttempts = int.Parse(configuration["JWTSettings:MaxFailedAccessAttempts"] ?? "10");
+                options.Lockout.AllowedForNewUsers = true;
+            });
+
             if (Environment.GetEnvironmentVariable("SmtpPassword") != null)
             {
                 services.Configure<MailSettings>(x =>

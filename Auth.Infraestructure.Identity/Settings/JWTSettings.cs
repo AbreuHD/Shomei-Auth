@@ -8,5 +8,7 @@ namespace Auth.Infraestructure.Identity.Settings
         public required string Audience { get; set; }
         public required int DurationInMinutes { get; set; }
         public required bool UseDifferentProfiles { get; set; }
+        public int? MaxFailedAccessAttempts { get; set; }
+        public int? DefaultLockoutTimeSpan { get; set; }
     }
 }

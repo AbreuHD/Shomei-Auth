@@ -5,6 +5,7 @@ using Auth.Infraestructure.Identity.DTOs.Password;
 using Auth.Infraestructure.Identity.DTOs.UserName;
 using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
 using Auth.Infraestructure.Identity.Features.Email.Commands;
+using Auth.Infraestructure.Identity.Features.ForgotPSW.Commands;
 using Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin;
 using Auth.Infraestructure.Identity.Features.Password.Commads;
 using Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount;
@@ -14,6 +15,7 @@ using Auth.Infraestructure.Identity.Features.UserProfile.Commands;
 using Auth.Infraestructure.Identity.Features.UserProfile.Queries;
 using Auth.Infraestructure.Identity.Features.UserSessions.Commands;
 using Auth.Infraestructure.Identity.Features.UserSessions.Queries;
+using Auth.Infraestructure.Identity.Features.UserSystem.Queries;
 using Auth.Infraestructure.Identity.Middleware;
 using Auth.Testing.AuthAPI.ExtraConfig.Enums;
 using MediatR;
@@ -250,15 +252,35 @@ namespace Auth.Testing.AuthAPI.Controllers
 
         [HttpPut("ChangeEmailWithOtp")]
         [Authorize]
-        public async Task<IActionResult> ChangeEmailWithOtp(ChangeEmailRequestDto requestDto)
+        public async Task<IActionResult> ChangeEmailWithOtp(ChangeEmailWithOtpRequestDto requestDto)
         {
-            var request = new ChangeEmailCommand()
+            var request = new ChangeEmailWithOtpCommand()
             {
                 Dto = requestDto,
                 UserId = User.FindFirst("uid")!.Value,
-                UseOtp = true
             };
             var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
+        }
+
+        [HttpPut("GeneratePasswordResetOtp")]
+        [Authorize]
+        public async Task<IActionResult> GeneratePasswordResetOtp(PasswordChangeOtpRequestDto requestDto)
+        {
+            var request = new GeneratePasswordResetOtpCommand()
+            {
+                Dto = requestDto,
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
+                UserAgent = Request.Headers.UserAgent.ToString()
+            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
+        }
+
+        [HttpGet("GetAllUsers")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var response = await Mediator.Send(new GetAllUsersQuery());
             return StatusCode(response.Statuscode, response);
         }
     }

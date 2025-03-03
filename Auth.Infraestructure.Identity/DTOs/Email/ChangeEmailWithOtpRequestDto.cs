@@ -1,8 +1,8 @@
 ﻿namespace Auth.Infraestructure.Identity.DTOs.Email
 {
-    public class ChangeEmailRequestDto
+    public class ChangeEmailWithOtpRequestDto
     {
         public required string NewEmail { get; set; }
-        public required string Password { get; set; }
+        public required string Otp { get; set; }
     }
 }
