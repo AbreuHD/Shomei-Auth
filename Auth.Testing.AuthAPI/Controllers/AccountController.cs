@@ -15,6 +15,7 @@ using Auth.Infraestructure.Identity.Features.UserProfile.Commands;
 using Auth.Infraestructure.Identity.Features.UserProfile.Queries;
 using Auth.Infraestructure.Identity.Features.UserSessions.Commands;
 using Auth.Infraestructure.Identity.Features.UserSessions.Queries;
+using Auth.Infraestructure.Identity.Features.UserSystem.Queries;
 using Auth.Infraestructure.Identity.Middleware;
 using Auth.Testing.AuthAPI.ExtraConfig.Enums;
 using MediatR;
@@ -273,6 +274,13 @@ namespace Auth.Testing.AuthAPI.Controllers
                 UserAgent = Request.Headers.UserAgent.ToString()
             };
             var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
+        }
+
+        [HttpGet("GetAllUsers")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var response = await Mediator.Send(new GetAllUsersQuery());
             return StatusCode(response.Statuscode, response);
         }
     }

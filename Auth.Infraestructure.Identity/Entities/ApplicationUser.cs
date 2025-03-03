@@ -6,6 +6,7 @@ namespace Auth.Infraestructure.Identity.Entities
     {
         public required string Name { get; set; }
         public required string LastName { get; set; }
+        public bool? IsBanned { get; set; } = false;
 
         public ICollection<UserProfile>? UserProfile { get; set; } = [];
         public ICollection<UserSession> Sessions { get; set; } = [];
