@@ -54,7 +54,7 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
             var response = new GenericApiResponse<string>()
             {
                 Payload = "Account Created",
-                Success = false,
+                Success = true,
                 Statuscode = StatusCodes.Status200OK,
                 Message = "We send a verification Email to your account, please active your account"
             };
