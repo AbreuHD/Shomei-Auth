@@ -64,7 +64,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
             {
                 Audience = Environment.GetEnvironmentVariable("Audience") ?? configuration["JWTSettings:Audience"] ?? string.Empty,
                 Issuer = Environment.GetEnvironmentVariable("Issuer") ?? configuration["JWTSettings:Issuer"] ?? string.Empty,
-                UseDifferentProfiles = bool.Parse(Environment.GetEnvironmentVariable("UseDifferentProfiles") ?? configuration["JWTSettings:UseDifferentProfiles"] ?? "0"),
+                UseDifferentProfiles = bool.Parse(Environment.GetEnvironmentVariable("UseDifferentProfiles") ?? configuration["JWTSettings:UseDifferentProfiles"] ?? "false"),
                 Key = Environment.GetEnvironmentVariable("Key") ?? configuration["JWTSettings:Key"] ?? string.Empty,
                 DurationInMinutes = int.Parse(Environment.GetEnvironmentVariable("DurationInMinutes") ?? configuration["JWTSettings:DurationInMinutes"] ?? "0")
             };
@@ -73,8 +73,8 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
         {
             var response = new GenericApiResponse<AuthenticationResponse>()
             {
-                Success = false,
-                Statuscode = StatusCodes.Status500InternalServerError,
+                Success = true,
+                Statuscode = StatusCodes.Status200OK,
                 Message = "N/A"
             };
             try
