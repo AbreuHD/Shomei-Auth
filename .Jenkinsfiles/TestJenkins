@@ -4,7 +4,7 @@ pipeline {
         NUGET_API_KEY = credentials('private_nuget_api_key')
         NUGET_SERVER_URL = credentials('private_nuget_uri')
         SONARQUBE_EXCLUDE_FILES = "**/*.xml,**/*.json,**/*.html,**/*.css,**/*.js,**/Program.cs,**/Startup.cs,**/Migrations/**"
-        VERSION = "1.0.1"
+        VERSION = "1.0.2"
     }
 
     stages {
