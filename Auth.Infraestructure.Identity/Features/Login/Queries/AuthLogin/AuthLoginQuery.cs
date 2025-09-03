@@ -67,7 +67,7 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
                 Audience = Environment.GetEnvironmentVariable("Audience") ?? configuration["JWTSettings:Audience"] ?? string.Empty,
                 Issuer = Environment.GetEnvironmentVariable("Issuer") ?? configuration["JWTSettings:Issuer"] ?? string.Empty,
                 Key = Environment.GetEnvironmentVariable("Key") ?? configuration["JWTSettings:Key"] ?? string.Empty,
-                UseDifferentProfiles = bool.Parse(Environment.GetEnvironmentVariable("UseDifferentProfiles") ?? configuration["JWTSettings:UseDifferentProfiles"] ?? "0"),
+                UseDifferentProfiles = bool.Parse(Environment.GetEnvironmentVariable("UseDifferentProfiles") ?? configuration["JWTSettings:UseDifferentProfiles"] ?? "false"),
                 DurationInMinutes = int.Parse(Environment.GetEnvironmentVariable("DurationInMinutes") ?? configuration["JWTSettings:DurationInMinutes"] ?? "0"),
                 MaxFailedAccessAttempts = int.Parse(Environment.GetEnvironmentVariable("MaxFailedAccessAttempts") ?? configuration["JWTSettings:MaxFailedAccessAttempts"] ?? "10"),
                 DefaultLockoutTimeSpan = int.Parse(Environment.GetEnvironmentVariable("DefaultLockoutTimeSpan") ?? configuration["JWTSettings:DefaultLockoutTimeSpan"] ?? "30")
