@@ -4,6 +4,7 @@ using Auth.Infraestructure.Identity.DTOs.Otp;
 using Auth.Infraestructure.Identity.DTOs.Password;
 using Auth.Infraestructure.Identity.DTOs.UserName;
 using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
+using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.GetDataFromJWT;
 using Auth.Infraestructure.Identity.Features.Email.Commands;
 using Auth.Infraestructure.Identity.Features.ForgotPSW.Commands;
 using Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin;
@@ -281,6 +282,13 @@ namespace Auth.Testing.AuthAPI.Controllers
         public async Task<IActionResult> GetAllUsers()
         {
             var response = await Mediator.Send(new GetAllUsersQuery());
+            return StatusCode(response.Statuscode, response);
+        }
+
+        [HttpGet("GetInfo")]
+        public async Task<IActionResult> GetInfo()
+        {
+            var response = await Mediator.Send(new GetDataFromJwtCommand());
             return StatusCode(response.Statuscode, response);
         }
     }
