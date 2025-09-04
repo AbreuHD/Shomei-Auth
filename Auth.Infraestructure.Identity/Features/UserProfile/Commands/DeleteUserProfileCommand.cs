@@ -48,7 +48,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
             }
             _context.Set<Entities.UserProfile>().Remove(userProfile);
             await _context.SaveChangesAsync();
-            return new GenericApiResponse<bool> { Message = "Deleted", Payload = false, Statuscode = StatusCodes.Status200OK, Success = false };
+            return new GenericApiResponse<bool> { Message = "Deleted", Payload = true, Statuscode = StatusCodes.Status200OK, Success = true };
 
         }
     }

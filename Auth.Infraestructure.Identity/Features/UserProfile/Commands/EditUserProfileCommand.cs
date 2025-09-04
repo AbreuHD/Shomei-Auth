@@ -54,7 +54,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
                 _context.Set<Entities.UserProfile>().Update(UserProfile);
                 await _context.SaveChangesAsync(cancellationToken);
 
-                return new GenericApiResponse<bool> { Success = true, Message = "Profile Added Sucessfully", Statuscode = StatusCodes.Status200OK, Payload = true };
+                return new GenericApiResponse<bool> { Success = true, Message = "Profile Edited Sucessfully", Statuscode = StatusCodes.Status200OK, Payload = true };
             }
             catch (Exception e)
             {
