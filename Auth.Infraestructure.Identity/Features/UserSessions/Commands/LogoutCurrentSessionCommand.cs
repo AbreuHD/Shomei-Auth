@@ -29,7 +29,7 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
 
         public async Task<GenericApiResponse<bool>> Handle(LogoutCurrentSessionCommand request, CancellationToken cancellationToken)
         {
-            var hashedToken = ExtraMethods.HashToken(request.Token);
+            var hashedToken = ExtraMethods.GetHash(request.Token);
             var identityResponse = await _identityContext.Set<Entities.UserSession>().FirstOrDefaultAsync(x => x.Token == hashedToken, cancellationToken);
             if (identityResponse == null)
             {

@@ -95,16 +95,9 @@ namespace Auth.Testing.AuthAPI.Controllers
 
         [HttpPost("SelectProfile")]
         [Authorize]
-        public async Task<IActionResult> SelectProfile([FromBody] SelectProfileRequestDto requestDto)
+        public async Task<IActionResult> SelectProfile([FromBody] SelectProfileQuery requestDto)
         {
-            var request = new SelectProfileQuery
-            {
-                Dto = requestDto,
-                UserAgent = Request.Headers.UserAgent.ToString(),
-                IpAdress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
-                UserId = User.FindFirst("uid")!.Value
-            };
-            var response = await Mediator.Send(request);
+            var response = await Mediator.Send(requestDto);
             return StatusCode(response.Statuscode, response);
         }
 
@@ -118,14 +111,9 @@ namespace Auth.Testing.AuthAPI.Controllers
 
         [HttpPost("CreateUserProfileCommand")]
         [Authorize]
-        public async Task<IActionResult> CreateUserProfile(CreateUserProfileRequestDto requestDto)
+        public async Task<IActionResult> CreateUserProfile(CreateUserProfileCommand requestDto)
         {
-            var request = new CreateUserProfileCommand()
-            {
-                Dto = requestDto,
-                UserId = User.FindFirst("uid")!.Value
-            };
-            var response = await Mediator.Send(request);
+            var response = await Mediator.Send(requestDto);
             return StatusCode(response.Statuscode, response);
         }
 
@@ -266,19 +254,14 @@ namespace Auth.Testing.AuthAPI.Controllers
 
         [HttpPut("GeneratePasswordResetOtp")]
         [Authorize]
-        public async Task<IActionResult> GeneratePasswordResetOtp(PasswordChangeOtpRequestDto requestDto)
+        public async Task<IActionResult> GeneratePasswordResetOtp([FromBody]string email)
         {
-            var request = new GeneratePasswordResetOtpCommand()
-            {
-                Dto = requestDto,
-                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
-                UserAgent = Request.Headers.UserAgent.ToString()
-            };
-            var response = await Mediator.Send(request);
+            var response = await Mediator.Send(new GeneratePasswordResetOtpCommand() { Email = email });
             return StatusCode(response.Statuscode, response);
         }
 
         [HttpGet("GetAllUsers")]
+        [Authorize]
         public async Task<IActionResult> GetAllUsers()
         {
             var response = await Mediator.Send(new GetAllUsersQuery());
@@ -286,6 +269,7 @@ namespace Auth.Testing.AuthAPI.Controllers
         }
 
         [HttpGet("GetInfo")]
+        [Authorize]
         public async Task<IActionResult> GetInfo()
         {
             var response = await Mediator.Send(new GetDataFromJwtCommand());

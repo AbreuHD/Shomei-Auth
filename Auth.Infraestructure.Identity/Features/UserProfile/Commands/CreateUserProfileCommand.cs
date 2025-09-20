@@ -1,6 +1,7 @@
 ﻿using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.DTOs.Generic;
+using Auth.Infraestructure.Identity.Extra;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -16,32 +17,53 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
     public class CreateUserProfileCommand : IRequest<GenericApiResponse<bool>>
     {
         /// <summary>
-        /// The user profile data transfer object (DTO) containing user profile details.
+        /// The full name of the user.
         /// </summary>
         /// <remarks>
-        /// This object includes necessary fields like the user's name and avatar URL. 
-        /// It is passed to the handler for creating a new profile in the database.
+        /// The user's name is a required field and will be used to identify the user on the platform.
         /// </remarks>
-        public required CreateUserProfileRequestDto Dto { get; set; }
+        public required string Name { get; set; }
 
         /// <summary>
-        /// The ID of the user for whom the profile is being created.
+        /// The URL to the user's avatar image.
         /// </summary>
         /// <remarks>
-        /// The User ID is used to link the profile to an existing user in the system. 
-        /// It ensures that the profile is associated with the correct user.
+        /// This field is optional. If provided, it will be used to display the user's profile picture. 
+        /// If not provided, the user will have a default avatar.
         /// </remarks>
-        public required string UserId { get; set; }
+        public string? AvatarUrl { get; set; }
+
+        /// <summary>
+        /// The password for the user profile.
+        /// </summary>
+        /// <remarks>
+        /// This field is optional. If provided, it can be used to set or update the user's password.
+        /// If not provided, the profile not use password.
+        /// </remarks>
+        public string? Password { get; set; }
     }
-    internal class CreateUserProfileCommandHandler(IdentityContext context) : IRequestHandler<CreateUserProfileCommand, GenericApiResponse<bool>>
+    internal class CreateUserProfileCommandHandler(IdentityContext context, IHttpContextAccessor httpContextAccessor) : IRequestHandler<CreateUserProfileCommand, GenericApiResponse<bool>>
     {
         private readonly IdentityContext _context = context;
-
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         public async Task<GenericApiResponse<bool>> Handle(CreateUserProfileCommand request, CancellationToken cancellationToken)
         {
+            var user = _httpContextAccessor.HttpContext?.User;
+            var uidClaim = user?.FindFirst("uid")?.Value;
+            if (uidClaim == null)
+            {
+                return new GenericApiResponse<bool> { Success = false, Message = "You are not logged", Statuscode = StatusCodes.Status400BadRequest, Payload = false };
+            }
+
             try
             {
-                var profile = new Entities.UserProfile { UserId = request.UserId, Name = request.Dto.Name, AvatarUrl = request.Dto.AvatarUrl };
+                var existingProfile = await _context.Set<Entities.UserProfile>().FindAsync([uidClaim], cancellationToken);
+                if (existingProfile != null)
+                {
+                    return new GenericApiResponse<bool> { Success = false, Message = "Profile Already Exists", Statuscode = StatusCodes.Status400BadRequest, Payload = false };
+                }
+                request.Password = request.Password == null ? null : ExtraMethods.GetHash(request.Password);
+                var profile = new Entities.UserProfile { UserId = uidClaim, Name = request.Name, AvatarUrl = request.AvatarUrl, Password = request.Password };
                 await _context.Set<Entities.UserProfile>().AddAsync(profile, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
                 return new GenericApiResponse<bool> { Success = true, Message = "Profile Added Sucessfully", Statuscode = StatusCodes.Status200OK, Payload = true };

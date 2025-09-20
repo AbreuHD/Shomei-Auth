@@ -17,7 +17,7 @@ namespace Auth.Infraestructure.Identity.Otp
         {
             var otpRecord = await _identityContext.Set<MailOtp>()
                 .Where(x => x.UserId == userId
-                    && x.Otp == ExtraMethods.HashToken(otp)
+                    && x.Otp == ExtraMethods.GetHash(otp)
                     && x.Purpose == purpose)
                 .FirstOrDefaultAsync();
 

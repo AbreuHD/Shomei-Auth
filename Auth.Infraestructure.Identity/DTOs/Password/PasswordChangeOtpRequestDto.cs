@@ -8,6 +8,6 @@ namespace Auth.Infraestructure.Identity.DTOs.Password
 {
     public class PasswordChangeOtpRequestDto
     {
-        public required string Email { get; set; }
+        
     }
 }

@@ -84,7 +84,7 @@ namespace Auth.Infraestructure.Identity.Extra
             return Otp;
         }
 
-        internal static string HashToken(string token)
+        internal static string GetHash(string token)
         {
             var bytes = Encoding.UTF8.GetBytes(token);
             var hash = SHA256.HashData(bytes);

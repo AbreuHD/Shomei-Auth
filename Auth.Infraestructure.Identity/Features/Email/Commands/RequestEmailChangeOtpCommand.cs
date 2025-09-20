@@ -60,7 +60,7 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands
                 _identityContext.Set<MailOtp>().Add(new MailOtp
                 {
                     UserId = user.Id,
-                    Otp = ExtraMethods.HashToken(Otp),
+                    Otp = ExtraMethods.GetHash(Otp),
                     Expiration = DateTime.UtcNow.AddMinutes(15),
                     UserAgent = request.UserAgent,
                     IpAddress = request.IpAddress,
