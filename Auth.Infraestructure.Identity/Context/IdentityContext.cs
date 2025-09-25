@@ -1,9 +1,9 @@
-﻿using Auth.Infraestructure.Identity.Entities;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Shomei.Infraestructure.Identity.Entities;
 
-namespace Auth.Infraestructure.Identity.Context
+namespace Shomei.Infraestructure.Identity.Context
 {
     public class IdentityContext(DbContextOptions<IdentityContext> option) : IdentityDbContext<ApplicationUser>(option)
     {

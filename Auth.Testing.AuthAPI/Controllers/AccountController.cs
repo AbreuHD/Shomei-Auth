@@ -1,28 +1,28 @@
-using Auth.Infraestructure.Identity.DTOs.Account;
-using Auth.Infraestructure.Identity.Enums;
-using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
-using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmailWithOtp;
-using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.GetDataFromJWT;
-using Auth.Infraestructure.Identity.Features.Email.Commands;
-using Auth.Infraestructure.Identity.Features.ForgotPSW.Commands;
-using Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin;
-using Auth.Infraestructure.Identity.Features.Password.Commads;
-using Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount;
-using Auth.Infraestructure.Identity.Features.Register.Commands.SendValidationEmailAgain;
-using Auth.Infraestructure.Identity.Features.UserName.Commands;
-using Auth.Infraestructure.Identity.Features.UserProfile.Commands;
-using Auth.Infraestructure.Identity.Features.UserProfile.Queries;
-using Auth.Infraestructure.Identity.Features.UserSessions.Commands;
-using Auth.Infraestructure.Identity.Features.UserSessions.Queries;
-using Auth.Infraestructure.Identity.Features.UserSystem.Queries;
-using Auth.Infraestructure.Identity.Middleware;
-using Auth.Testing.AuthAPI.ExtraConfig.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shomei.Infraestructure.Identity.DTOs.Account;
+using Shomei.Infraestructure.Identity.Enums;
+using Shomei.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
+using Shomei.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmailWithOtp;
+using Shomei.Infraestructure.Identity.Features.AuthenticateEmail.Command.GetDataFromJWT;
+using Shomei.Infraestructure.Identity.Features.Email.Commands;
+using Shomei.Infraestructure.Identity.Features.ForgotPSW.Commands;
+using Shomei.Infraestructure.Identity.Features.Login.Queries.AuthLogin;
+using Shomei.Infraestructure.Identity.Features.Password.Commads;
+using Shomei.Infraestructure.Identity.Features.Register.Commands.CreateAccount;
+using Shomei.Infraestructure.Identity.Features.Register.Commands.SendValidationEmailAgain;
+using Shomei.Infraestructure.Identity.Features.UserName.Commands;
+using Shomei.Infraestructure.Identity.Features.UserProfile.Commands;
+using Shomei.Infraestructure.Identity.Features.UserProfile.Queries;
+using Shomei.Infraestructure.Identity.Features.UserSessions.Commands;
+using Shomei.Infraestructure.Identity.Features.UserSessions.Queries;
+using Shomei.Infraestructure.Identity.Features.UserSystem.Queries;
+using Shomei.Infraestructure.Identity.Middleware;
+using Shomei.Testing.AuthAPI.ExtraConfig.Enums;
 using System.Security.Cryptography;
 
-namespace Auth.Testing.AuthAPI.Controllers
+namespace Shomei.Testing.AuthAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
@@ -49,14 +49,14 @@ namespace Auth.Testing.AuthAPI.Controllers
         }
 
         [HttpGet("ConfirmEmail")]
-        public async Task<IActionResult> ConfirmEmail([FromQuery]AuthEmailCommand request)
+        public async Task<IActionResult> ConfirmEmail([FromQuery] AuthEmailCommand request)
         {
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
         }
 
         [HttpGet("ConfirmEmailWithOtp")]
-        public async Task<IActionResult> ConfirmEmailWithOtp([FromQuery]AuthEmailWithOtpCommand request)
+        public async Task<IActionResult> ConfirmEmailWithOtp([FromQuery] AuthEmailWithOtpCommand request)
         {
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);

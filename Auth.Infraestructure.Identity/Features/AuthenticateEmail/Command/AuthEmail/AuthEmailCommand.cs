@@ -1,13 +1,12 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Account;
-using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.Entities;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.Entities;
 using System.Text;
 
-namespace Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail
+namespace Shomei.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail
 {
     /// <summary>
     /// This class is used to authenticate and confirm a user's email by validating a confirmation token.

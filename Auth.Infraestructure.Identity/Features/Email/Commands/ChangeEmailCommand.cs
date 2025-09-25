@@ -1,11 +1,11 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.Entities;
-using Auth.Infraestructure.Identity.Services;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.Entities;
+using Shomei.Infraestructure.Identity.Services;
 
-namespace Auth.Infraestructure.Identity.Features.Email.Commands
+namespace Shomei.Infraestructure.Identity.Features.Email.Commands
 {
     /// <summary>
     /// Represents a command to change a user's email address.

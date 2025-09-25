@@ -1,4 +1,4 @@
-﻿namespace Auth.Infraestructure.Identity.DTOs.Generic
+﻿namespace Shomei.Infraestructure.Identity.DTOs.Generic
 {
     /// <summary>
     /// A generic response class for API calls.

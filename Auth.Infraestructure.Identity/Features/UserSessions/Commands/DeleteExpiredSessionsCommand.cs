@@ -1,9 +1,9 @@
-﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.Entities;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Shomei.Infraestructure.Identity.Context;
+using Shomei.Infraestructure.Identity.Entities;
 
-namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
+namespace Shomei.Infraestructure.Identity.Features.UserSessions.Commands
 {
     /// <summary>
     /// Command to delete expired user sessions from the database.

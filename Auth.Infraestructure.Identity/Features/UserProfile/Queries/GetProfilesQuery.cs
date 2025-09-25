@@ -1,11 +1,11 @@
-﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.DTOs.Profiles;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Shomei.Infraestructure.Identity.Context;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.DTOs.Profiles;
 
-namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
+namespace Shomei.Infraestructure.Identity.Features.UserProfile.Queries
 {
     /// <summary>
     /// Query for retrieving user profiles based on the user ID.

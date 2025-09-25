@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Auth.Infraestructure.Identity.DTOs.Geolocation
+namespace Shomei.Infraestructure.Identity.DTOs.Geolocation
 {
     public class LocationInfoDto
     {

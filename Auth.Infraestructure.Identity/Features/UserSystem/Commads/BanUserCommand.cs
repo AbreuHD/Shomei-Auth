@@ -1,11 +1,11 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.DTOs.Users;
-using Auth.Infraestructure.Identity.Entities;
-using Auth.Infraestructure.Identity.Services;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.DTOs.Users;
+using Shomei.Infraestructure.Identity.Entities;
+using Shomei.Infraestructure.Identity.Services;
 
-namespace Auth.Infraestructure.Identity.Features.UserSystem.Commads
+namespace Shomei.Infraestructure.Identity.Features.UserSystem.Commads
 {
     public class BanUserCommand : IRequest<GenericApiResponse<bool>>
     {

@@ -1,11 +1,11 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.Entities;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.Entities;
 using System.Security.Claims;
 
-namespace Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.GetDataFromJWT
+namespace Shomei.Infraestructure.Identity.Features.AuthenticateEmail.Command.GetDataFromJWT
 {
     /// <summary>
     /// Command to retrieve the current authenticated user's data (from JWT claims)

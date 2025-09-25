@@ -1,19 +1,17 @@
-﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Account;
-using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.DTOs.Mail;
-using Auth.Infraestructure.Identity.Entities;
-using Auth.Infraestructure.Identity.Enums;
-using Auth.Infraestructure.Identity.Extra;
-using Auth.Infraestructure.Identity.Mails;
-using Auth.Infraestructure.Identity.Settings;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using System.Net.Http;
+using Shomei.Infraestructure.Identity.Context;
+using Shomei.Infraestructure.Identity.DTOs.Account;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.DTOs.Mail;
+using Shomei.Infraestructure.Identity.Entities;
+using Shomei.Infraestructure.Identity.Enums;
+using Shomei.Infraestructure.Identity.Extra;
+using Shomei.Infraestructure.Identity.Mails;
+using Shomei.Infraestructure.Identity.Settings;
 
-namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
+namespace Shomei.Infraestructure.Identity.Features.Register.Commands.CreateAccount
 {
     /// <summary>
     /// Represents a command to create a new user account.
@@ -159,7 +157,7 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
                 response.Payload = regiteredUser!.Id;
                 await _userManager.AddToRoleAsync(user, request.UserType);
 
-                switch(request.VerificationMode)
+                switch (request.VerificationMode)
                 {
                     case VerificationMode.Otp:
                         var Otp = ExtraMethods.GenerateOtp();
@@ -169,7 +167,7 @@ namespace Auth.Infraestructure.Identity.Features.Register.Commands.CreateAccount
                             Otp = ExtraMethods.GetHash(Otp),
                             Expiration = DateTime.UtcNow.AddMinutes(15),
                             UserAgent = UserAgent,
-                            IpAddress = IpAddress,  
+                            IpAddress = IpAddress,
                             Purpose = OtpPurpose.VerifyAccount.ToString()
                         });
                         await _identityContext.SaveChangesAsync(cancellationToken);

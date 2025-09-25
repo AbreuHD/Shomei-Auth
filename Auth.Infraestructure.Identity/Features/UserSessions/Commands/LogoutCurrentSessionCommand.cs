@@ -1,12 +1,13 @@
-﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.Extra;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Shomei.Infraestructure.Identity.Context;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.Entities;
+using Shomei.Infraestructure.Identity.Extra;
 
 
-namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
+namespace Shomei.Infraestructure.Identity.Features.UserSessions.Commands
 {
     /// <summary>
     /// Command to log out the current session using the provided token.
@@ -26,7 +27,7 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
         {
             var Token = _httpContextAccessor.HttpContext.Request.Headers.Authorization.ToString().Split(" ")[1];
             var hashedToken = ExtraMethods.GetHash(Token);
-            var identityResponse = await _identityContext.Set<Entities.UserSession>().FirstOrDefaultAsync(x => x.Token == hashedToken, cancellationToken);
+            var identityResponse = await _identityContext.Set<UserSession>().FirstOrDefaultAsync(x => x.Token == hashedToken, cancellationToken);
             if (identityResponse == null)
             {
                 return new GenericApiResponse<bool>
@@ -38,7 +39,7 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
                 };
             }
 
-            _identityContext.Set<Entities.UserSession>().Remove(identityResponse);
+            _identityContext.Set<UserSession>().Remove(identityResponse);
             await _identityContext.SaveChangesAsync(cancellationToken);
 
             return new GenericApiResponse<bool>

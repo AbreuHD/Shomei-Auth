@@ -1,4 +1,4 @@
-﻿namespace Auth.Testing.AuthAPI.ExtraConfig.Enums
+﻿namespace Shomei.Testing.AuthAPI.ExtraConfig.Enums
 {
     public enum Roles
     {

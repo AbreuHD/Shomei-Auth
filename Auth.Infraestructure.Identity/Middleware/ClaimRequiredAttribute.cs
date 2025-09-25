@@ -1,8 +1,8 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Generic;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
 
-namespace Auth.Infraestructure.Identity.Middleware
+namespace Shomei.Infraestructure.Identity.Middleware
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class ClaimRequiredAttribute(string claimType, string message) : ActionFilterAttribute

@@ -1,4 +1,4 @@
-﻿namespace Auth.Infraestructure.Identity.Enums
+﻿namespace Shomei.Infraestructure.Identity.Enums
 {
     public enum VerificationMode
     {

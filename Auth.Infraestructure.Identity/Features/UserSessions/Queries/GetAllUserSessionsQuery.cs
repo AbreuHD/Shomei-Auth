@@ -1,13 +1,13 @@
-﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.DTOs.Sessions;
-using Auth.Infraestructure.Identity.Entities;
-using Auth.Infraestructure.Identity.Extra;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Shomei.Infraestructure.Identity.Context;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.DTOs.Sessions;
+using Shomei.Infraestructure.Identity.Entities;
+using Shomei.Infraestructure.Identity.Extra;
 
-namespace Auth.Infraestructure.Identity.Features.UserSessions.Queries
+namespace Shomei.Infraestructure.Identity.Features.UserSessions.Queries
 {
     /// <summary>
     /// Query to retrieve all sessions for a user.

@@ -1,4 +1,4 @@
-﻿namespace Auth.Infraestructure.Identity.DTOs.Profiles
+﻿namespace Shomei.Infraestructure.Identity.DTOs.Profiles
 {
     /// <summary>
     /// Response model for getting user profiles.

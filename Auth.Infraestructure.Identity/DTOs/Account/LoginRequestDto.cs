@@ -1,4 +1,4 @@
-﻿namespace Auth.Infraestructure.Identity.DTOs.Account
+﻿namespace Shomei.Infraestructure.Identity.DTOs.Account
 {
     /// <summary>
     /// Represents the data transfer object (DTO) used for user login authentication.

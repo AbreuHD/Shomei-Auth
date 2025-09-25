@@ -1,4 +1,4 @@
-﻿namespace Auth.Infraestructure.Identity.DTOs.Account
+﻿namespace Shomei.Infraestructure.Identity.DTOs.Account
 {
     /// <summary>
     /// Data Transfer Object (DTO) for user registration. 

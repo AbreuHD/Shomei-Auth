@@ -1,4 +1,4 @@
-﻿namespace Auth.Infraestructure.Identity.Mails
+﻿namespace Shomei.Infraestructure.Identity.Mails
 {
     public class AccountLockEmail
     {

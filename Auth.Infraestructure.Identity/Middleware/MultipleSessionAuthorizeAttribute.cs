@@ -1,14 +1,14 @@
-﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.Entities;
-using Auth.Infraestructure.Identity.Extra;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
+using Shomei.Infraestructure.Identity.Context;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.Entities;
+using Shomei.Infraestructure.Identity.Extra;
 using System.IdentityModel.Tokens.Jwt;
 
-namespace Auth.Infraestructure.Identity.Middleware
+namespace Shomei.Infraestructure.Identity.Middleware
 {
     /// <summary>
     /// A custom authorization filter that checks if the user has a valid session by verifying the JWT token.

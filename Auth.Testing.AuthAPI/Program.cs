@@ -1,6 +1,6 @@
-using Auth.Infraestructure.Identity;
-using Auth.Testing.AuthAPI.Extensions;
-using Auth.Testing.AuthAPI.ExtraConfig.Enums;
+using Shomei.Infraestructure.Identity;
+using Shomei.Testing.AuthAPI.Extensions;
+using Shomei.Testing.AuthAPI.ExtraConfig.Enums;
 
 var builder = WebApplication.CreateBuilder(args);
 

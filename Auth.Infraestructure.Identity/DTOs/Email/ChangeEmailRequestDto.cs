@@ -1,4 +1,4 @@
-﻿namespace Auth.Infraestructure.Identity.DTOs.Email
+﻿namespace Shomei.Infraestructure.Identity.DTOs.Email
 {
     public class ChangeEmailRequestDto
     {
