@@ -1,0 +1,225 @@
+﻿using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Shomei.Infraestructure.Identity.Context;
+using Shomei.Infraestructure.Identity.DTOs.Account;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.DTOs.Mail;
+using Shomei.Infraestructure.Identity.Entities;
+using Shomei.Infraestructure.Identity.Extra;
+using Shomei.Infraestructure.Identity.Mails;
+using Shomei.Infraestructure.Identity.Settings;
+using System.IdentityModel.Tokens.Jwt;
+
+
+namespace Shomei.Infraestructure.Identity.Features.Login.Queries.AuthLogin
+{
+    /// <summary>
+    /// Represents a query used to authenticate a user and generate a JWT Token for login.
+    /// It validates the user credentials and returns the authentication details, including the JWT token and refresh token.
+    /// </summary>
+    public class AuthLoginQuery : IRequest<GenericApiResponse<AuthenticationResponse>>
+    {
+        /// <summary>
+        /// The username of the user attempting to log in.
+        /// </summary>
+        /// <value>
+        /// A string representing the user's username.
+        /// </value>
+        public string? UserName { get; set; }
+
+        /// <summary>
+        /// The Email of the user attempting to log in.
+        /// </summary>
+        /// <value>
+        /// A string representing the user's email.
+        /// </value>
+        public string? Email { get; set; }
+
+        /// <summary>
+        /// The password of the user attempting to log in.
+        /// </summary>
+        /// <value>
+        /// A string representing the user's password.
+        /// </value>
+        public required string Password { get; set; }
+
+    }
+
+    internal class AuthLoginQueryHandler(UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        IConfiguration configuration,
+        IdentityContext identityContext,
+        IHttpClientFactory _httpClientFactory,
+        IHttpContextAccessor httpContextAccessor,
+        MailSettings _mailSettings)
+
+        : IRequestHandler<AuthLoginQuery, GenericApiResponse<AuthenticationResponse>>
+    {
+        private readonly IdentityContext _identityContext = identityContext;
+        private readonly UserManager<ApplicationUser> _userManager = userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+
+        private readonly JwtSettings _jwtSettings
+            = new()
+            {
+                Audience = Environment.GetEnvironmentVariable("Audience") ?? configuration["JWTSettings:Audience"] ?? string.Empty,
+                Issuer = Environment.GetEnvironmentVariable("Issuer") ?? configuration["JWTSettings:Issuer"] ?? string.Empty,
+                Key = Environment.GetEnvironmentVariable("Key") ?? configuration["JWTSettings:Key"] ?? string.Empty,
+                UseDifferentProfiles = bool.Parse(Environment.GetEnvironmentVariable("UseDifferentProfiles") ?? configuration["JWTSettings:UseDifferentProfiles"] ?? "false"),
+                DurationInMinutes = int.Parse(Environment.GetEnvironmentVariable("DurationInMinutes") ?? configuration["JWTSettings:DurationInMinutes"] ?? "0"),
+                MaxFailedAccessAttempts = int.Parse(Environment.GetEnvironmentVariable("MaxFailedAccessAttempts") ?? configuration["JWTSettings:MaxFailedAccessAttempts"] ?? "10"),
+                DefaultLockoutTimeSpan = int.Parse(Environment.GetEnvironmentVariable("DefaultLockoutTimeSpan") ?? configuration["JWTSettings:DefaultLockoutTimeSpan"] ?? "30")
+            };
+
+        public async Task<GenericApiResponse<AuthenticationResponse>> Handle(AuthLoginQuery request, CancellationToken cancellationToken)
+        {
+            var UserAgent = _httpContextAccessor.HttpContext!.Request.Headers.UserAgent.ToString() ?? "Unknown";
+            var IpAdress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+
+            if (string.IsNullOrEmpty(request.Email) && string.IsNullOrEmpty(request.UserName))
+            {
+                return new GenericApiResponse<AuthenticationResponse>()
+                {
+                    Message = "You need to complete all the values",
+                    Statuscode = StatusCodes.Status500InternalServerError,
+                    Success = false
+                };
+            }
+
+            var response = new GenericApiResponse<AuthenticationResponse>()
+            {
+                Message = "Logged",
+                Statuscode = StatusCodes.Status200OK,
+                Success = true,
+            };
+
+            try
+            {
+                ApplicationUser User;
+                if (!string.IsNullOrEmpty(request.Email))
+                {
+                    User = await _userManager.FindByEmailAsync(request.Email);
+                }
+                else
+                {
+                    User = await _userManager.FindByNameAsync(request.UserName);
+                }
+
+                if (User == null)
+                {
+                    response.Success = false;
+                    response.Message = $"No Account Register with {request.UserName}";
+                    response.Statuscode = StatusCodes.Status404NotFound;
+                    return response;
+                }
+                bool isFinalAttempt = User.AccessFailedCount == (_jwtSettings.MaxFailedAccessAttempts - 1);
+
+                var result = await _signInManager.PasswordSignInAsync(User.UserName!, request.Password, false, lockoutOnFailure: true);
+
+                if (User.IsBanned == true)
+                {
+                    response.Success = false;
+                    response.Message = $"Account Banned unitl {User.LockoutEnd}";
+                    response.Statuscode = StatusCodes.Status401Unauthorized;
+                    return response;
+                }
+
+                if (result.IsLockedOut && isFinalAttempt)
+                {
+                    var blockEmail = new AccountLockEmail()
+                    {
+                        UserName = User.UserName!,
+                        Ip = IpAdress,
+                        Country = (await ExtraMethods.GetGeoLocationInfo(IpAdress, _httpClientFactory))?.Country ?? "Unknown",
+                        UserAgent = UserAgent,
+                        LockDuration = $"{_jwtSettings.DefaultLockoutTimeSpan} minutes"
+                    };
+
+                    await ExtraMethods.SendEmail(_mailSettings, new SendEmailRequestDto
+                    {
+                        To = User.Email!,
+                        Body = blockEmail.GetEmailHtml(),
+                        Subject = "Confirm your email"
+                    });
+
+                    response.Success = false;
+                    response.Message = $"Account has been locked for multiple failed attempts. Please try again in {_jwtSettings.DefaultLockoutTimeSpan} minutes.";
+                    response.Statuscode = StatusCodes.Status423Locked;
+                    return response;
+                }
+                if (result.IsLockedOut)
+                {
+                    response.Success = false;
+                    response.Message = $"Account Locked/Banned until {User.LockoutEnd}";
+                    response.Statuscode = StatusCodes.Status423Locked;
+                    return response;
+                }
+                if (result.RequiresTwoFactor)
+                {
+                    response.Success = false;
+                    response.Message = $"Two Factor Authentication Required";
+                    response.Statuscode = StatusCodes.Status401Unauthorized;
+                    return response;
+                }
+                if (!result.Succeeded)
+                {
+                    response.Success = false;
+                    response.Message = $"Invalid Password";
+                    response.Statuscode = StatusCodes.Status409Conflict;
+                    return response;
+                }
+                if (!User.EmailConfirmed)
+                {
+                    response.Success = false;
+                    response.Message = $"Account not confirm for {request.UserName}";
+                    response.Statuscode = StatusCodes.Status400BadRequest;
+                    return response;
+                }
+
+                var userClaims = await _userManager.GetClaimsAsync(User);
+                var roles = await _userManager.GetRolesAsync(User);
+
+                JwtSecurityToken jwtSecurityToken = ExtraMethods.GenerateJWToken(User, _jwtSettings, userClaims, roles, null);
+                var token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+                if (!_jwtSettings.UseDifferentProfiles)
+                {
+                    var session = new UserSession
+                    {
+                        UserId = User.Id,
+                        Token = ExtraMethods.GetHash(token),
+                        Expiration = jwtSecurityToken.ValidTo,
+                        IpAddress = IpAdress,
+                        UserAgent = UserAgent,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    _identityContext.Set<UserSession>().Add(session);
+                    await _identityContext.SaveChangesAsync(cancellationToken);
+                }
+
+                response.Payload = new AuthenticationResponse
+                {
+                    Id = User.Id,
+                    Name = User.Name,
+                    UserName = User.UserName!,
+                    LastName = User.LastName,
+                    Email = User.Email!,
+                    IsVerified = User.EmailConfirmed,
+                    Roles = [.. roles],
+                    JWToken = token,
+                    RefreshToken = ExtraMethods.GenerateRefreshToken().Token
+                };
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+                response.Statuscode = StatusCodes.Status500InternalServerError;
+            }
+            return response;
+        }
+    }
+}
