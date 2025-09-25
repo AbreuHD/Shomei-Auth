@@ -1,7 +1,7 @@
 ﻿using Asp.Versioning;
 using Microsoft.OpenApi.Models;
 
-namespace Auth.Testing.AuthAPI.Extensions
+namespace Shomei.Testing.AuthAPI.Extensions
 {
     public static class ServicesExtensions
     {

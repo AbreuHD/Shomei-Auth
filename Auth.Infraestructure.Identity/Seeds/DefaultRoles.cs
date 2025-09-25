@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace Auth.Infraestructure.Identity.Seeds
+namespace Shomei.Infraestructure.Identity.Seeds
 {
     public static class DefaultRoles
     {

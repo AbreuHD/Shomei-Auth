@@ -1,4 +1,4 @@
-namespace Auth.Testing.AuthAPI
+namespace Shomei.Testing.AuthAPI
 {
     public class WeatherForecast
     {

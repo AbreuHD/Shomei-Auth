@@ -1,9 +1,10 @@
-﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Generic;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
+using Shomei.Infraestructure.Identity.Context;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.Entities;
 
-namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
+namespace Shomei.Infraestructure.Identity.Features.UserSessions.Commands
 {
     /// <summary>
     /// Command to log out all sessions for a specific user.
@@ -23,7 +24,7 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
         public async Task<GenericApiResponse<bool>> Handle(LogoutAllSessionsCommand request, CancellationToken cancellationToken)
         {
             var UserId = _httpContextAccessor.HttpContext.User.FindFirst("uid").Value;
-            var identityResponse = _identityContext.Set<Entities.UserSession>().Where(x => x.UserId == UserId);
+            var identityResponse = _identityContext.Set<UserSession>().Where(x => x.UserId == UserId);
             if (identityResponse == null)
             {
                 return new GenericApiResponse<bool>
@@ -35,7 +36,7 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
                 };
             }
 
-            _identityContext.Set<Entities.UserSession>().RemoveRange(identityResponse);
+            _identityContext.Set<UserSession>().RemoveRange(identityResponse);
             await _identityContext.SaveChangesAsync(cancellationToken);
 
             return new GenericApiResponse<bool>

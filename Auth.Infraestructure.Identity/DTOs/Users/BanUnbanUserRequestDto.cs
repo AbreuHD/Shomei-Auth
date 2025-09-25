@@ -1,4 +1,4 @@
-﻿namespace Auth.Infraestructure.Identity.DTOs.Users
+﻿namespace Shomei.Infraestructure.Identity.DTOs.Users
 {
     public class BanUnbanUserRequestDto
     {

@@ -1,9 +1,9 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.Entities;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.Entities;
 
-namespace Auth.Infraestructure.Identity.Services
+namespace Shomei.Infraestructure.Identity.Services
 {
     internal class BanService(UserManager<ApplicationUser> userManager)
     {

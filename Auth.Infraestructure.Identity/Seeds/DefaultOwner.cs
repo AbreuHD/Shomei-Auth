@@ -1,7 +1,7 @@
-﻿using Auth.Infraestructure.Identity.Entities;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
+using Shomei.Infraestructure.Identity.Entities;
 
-namespace Auth.Infraestructure.Identity.Seeds
+namespace Shomei.Infraestructure.Identity.Seeds
 {
     public static class DefaultOwner
     {

@@ -1,4 +1,4 @@
-﻿namespace Auth.Infraestructure.Identity.DTOs.UserName
+﻿namespace Shomei.Infraestructure.Identity.DTOs.UserName
 {
     /// <summary>
     /// Data transfer object (DTO) for changing a user's username.

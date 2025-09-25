@@ -1,9 +1,9 @@
-﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Generic;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
+using Shomei.Infraestructure.Identity.Context;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
 
-namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
+namespace Shomei.Infraestructure.Identity.Features.UserProfile.Commands
 {
     /// <summary>
     /// Command to edit a user profile.

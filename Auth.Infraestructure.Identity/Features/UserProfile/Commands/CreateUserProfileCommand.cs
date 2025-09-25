@@ -1,12 +1,12 @@
-﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.Extra;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Shomei.Infraestructure.Identity.Context;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.Extra;
 using System.ComponentModel.DataAnnotations;
 
-namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
+namespace Shomei.Infraestructure.Identity.Features.UserProfile.Commands
 {
     /// <summary>
     /// Command to create a user profile in the system.

@@ -1,4 +1,4 @@
-﻿namespace Auth.Infraestructure.Identity.DTOs.Mail
+﻿namespace Shomei.Infraestructure.Identity.DTOs.Mail
 {
     public class SendEmailPartialRequestDto
     {

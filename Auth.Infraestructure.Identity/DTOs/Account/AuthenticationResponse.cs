@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Auth.Infraestructure.Identity.DTOs.Account
+namespace Shomei.Infraestructure.Identity.DTOs.Account
 {
     /// <summary>
     /// Response DTO for authentication containing the user's details and JWT token.

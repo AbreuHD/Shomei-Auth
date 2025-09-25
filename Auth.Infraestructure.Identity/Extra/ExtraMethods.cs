@@ -1,22 +1,22 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Account;
-using Auth.Infraestructure.Identity.DTOs.Geolocation;
-using Auth.Infraestructure.Identity.DTOs.Mail;
-using Auth.Infraestructure.Identity.Entities;
-using Auth.Infraestructure.Identity.Settings;
-using MailKit.Net.Smtp;
+﻿using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
 using MimeKit;
 using Newtonsoft.Json;
+using Shomei.Infraestructure.Identity.DTOs.Account;
+using Shomei.Infraestructure.Identity.DTOs.Geolocation;
+using Shomei.Infraestructure.Identity.DTOs.Mail;
+using Shomei.Infraestructure.Identity.Entities;
+using Shomei.Infraestructure.Identity.Settings;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Security;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Auth.Infraestructure.Identity.Extra
+namespace Shomei.Infraestructure.Identity.Extra
 {
     public static class ExtraMethods
     {

@@ -1,6 +1,4 @@
-﻿using Auth.Infraestructure.Identity.Enums;
-
-namespace Auth.Infraestructure.Identity.DTOs.Account
+﻿namespace Shomei.Infraestructure.Identity.DTOs.Account
 {
     /// <summary>
     /// Data transfer object used to send a request for resending the validation email.

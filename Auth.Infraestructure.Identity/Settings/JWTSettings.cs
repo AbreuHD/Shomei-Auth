@@ -1,5 +1,4 @@
-﻿
-namespace Auth.Infraestructure.Identity.Settings
+﻿namespace Shomei.Infraestructure.Identity.Settings
 {
     public class JwtSettings
     {

@@ -1,10 +1,4 @@
-﻿using Auth.Infraestructure.Identity.BackgroundServices;
-using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.Entities;
-using Auth.Infraestructure.Identity.Seeds;
-using Auth.Infraestructure.Identity.Settings;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,10 +8,16 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using Shomei.Infraestructure.Identity.BackgroundServices;
+using Shomei.Infraestructure.Identity.Context;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.Entities;
+using Shomei.Infraestructure.Identity.Seeds;
+using Shomei.Infraestructure.Identity.Settings;
 using System.Reflection;
 using System.Text;
 
-namespace Auth.Infraestructure.Identity
+namespace Shomei.Infraestructure.Identity
 {
     public static class IdentityRegistration
     {

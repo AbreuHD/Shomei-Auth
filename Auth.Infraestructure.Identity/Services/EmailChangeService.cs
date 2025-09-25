@@ -1,12 +1,12 @@
-﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.Entities;
-using Auth.Infraestructure.Identity.Enums;
-using Auth.Infraestructure.Identity.Otp;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Shomei.Infraestructure.Identity.Context;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.Entities;
+using Shomei.Infraestructure.Identity.Enums;
+using Shomei.Infraestructure.Identity.Otp;
 
-namespace Auth.Infraestructure.Identity.Services
+namespace Shomei.Infraestructure.Identity.Services
 {
     internal class EmailChangeService(UserManager<ApplicationUser> userManager, IdentityContext? identityContext = null)
     {

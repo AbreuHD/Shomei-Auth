@@ -1,19 +1,19 @@
-﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Account;
-using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.DTOs.Mail;
-using Auth.Infraestructure.Identity.Entities;
-using Auth.Infraestructure.Identity.Extra;
-using Auth.Infraestructure.Identity.Mails;
-using Auth.Infraestructure.Identity.Settings;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Shomei.Infraestructure.Identity.Context;
+using Shomei.Infraestructure.Identity.DTOs.Account;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.DTOs.Mail;
+using Shomei.Infraestructure.Identity.Entities;
+using Shomei.Infraestructure.Identity.Extra;
+using Shomei.Infraestructure.Identity.Mails;
+using Shomei.Infraestructure.Identity.Settings;
 using System.IdentityModel.Tokens.Jwt;
 
 
-namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
+namespace Shomei.Infraestructure.Identity.Features.Login.Queries.AuthLogin
 {
     /// <summary>
     /// Represents a query used to authenticate a user and generate a JWT Token for login.

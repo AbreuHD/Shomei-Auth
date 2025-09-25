@@ -1,11 +1,11 @@
-﻿using Auth.Infraestructure.Identity.Features.UserSessions.Commands;
-using MediatR;
+﻿using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Shomei.Infraestructure.Identity.Features.UserSessions.Commands;
 
 
-namespace Auth.Infraestructure.Identity.BackgroundServices
+namespace Shomei.Infraestructure.Identity.BackgroundServices
 {
     public class SessionCleanupService(IServiceProvider serviceProvider, ILogger<SessionCleanupService> logger) : BackgroundService
     {

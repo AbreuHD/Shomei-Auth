@@ -1,4 +1,4 @@
-﻿namespace Auth.Infraestructure.Identity.DTOs.Otp
+﻿namespace Shomei.Infraestructure.Identity.DTOs.Otp
 {
     public class EmailChangeOtpRequestDto
     {

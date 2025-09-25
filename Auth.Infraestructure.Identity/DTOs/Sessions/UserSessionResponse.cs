@@ -1,4 +1,4 @@
-﻿namespace Auth.Infraestructure.Identity.DTOs.Sessions
+﻿namespace Shomei.Infraestructure.Identity.DTOs.Sessions
 {
     /// <summary>
     /// Response model for user session information.

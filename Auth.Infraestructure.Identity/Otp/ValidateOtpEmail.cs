@@ -1,11 +1,11 @@
-﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.Entities;
-using Auth.Infraestructure.Identity.Extra;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Shomei.Infraestructure.Identity.Context;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.Entities;
+using Shomei.Infraestructure.Identity.Extra;
 
-namespace Auth.Infraestructure.Identity.Otp
+namespace Shomei.Infraestructure.Identity.Otp
 {
     internal static class ValidateOtpEmail
     {

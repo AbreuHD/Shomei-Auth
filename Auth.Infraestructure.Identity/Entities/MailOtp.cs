@@ -1,4 +1,4 @@
-﻿namespace Auth.Infraestructure.Identity.Entities
+﻿namespace Shomei.Infraestructure.Identity.Entities
 {
     public class MailOtp
     {

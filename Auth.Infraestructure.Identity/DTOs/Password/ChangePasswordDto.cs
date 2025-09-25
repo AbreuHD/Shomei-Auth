@@ -1,4 +1,4 @@
-﻿namespace Auth.Infraestructure.Identity.DTOs.Password
+﻿namespace Shomei.Infraestructure.Identity.DTOs.Password
 {
     /// <summary>
     /// Data transfer object (DTO) for changing a user's password.

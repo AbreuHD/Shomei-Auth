@@ -1,13 +1,13 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.DTOs.Users;
-using Auth.Infraestructure.Identity.Entities;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.DTOs.Users;
+using Shomei.Infraestructure.Identity.Entities;
 
 
-namespace Auth.Infraestructure.Identity.Features.UserSystem.Queries
+namespace Shomei.Infraestructure.Identity.Features.UserSystem.Queries
 {
     public class GetAllUsersQuery : IRequest<GenericApiResponse<List<GetAllUsersResponseDto>>>
     {

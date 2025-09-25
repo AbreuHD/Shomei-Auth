@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Auth.Infraestructure.Identity.Entities
+namespace Shomei.Infraestructure.Identity.Entities
 {
     public class UserSession
     {

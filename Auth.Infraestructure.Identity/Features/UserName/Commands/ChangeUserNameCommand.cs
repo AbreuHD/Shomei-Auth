@@ -1,10 +1,10 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.Entities;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.Entities;
 
-namespace Auth.Infraestructure.Identity.Features.UserName.Commands
+namespace Shomei.Infraestructure.Identity.Features.UserName.Commands
 {
     /// <summary>
     /// Represents a command to change a user's username.

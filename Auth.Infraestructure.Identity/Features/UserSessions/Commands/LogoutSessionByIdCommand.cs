@@ -1,9 +1,10 @@
-﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Generic;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
+using Shomei.Infraestructure.Identity.Context;
+using Shomei.Infraestructure.Identity.DTOs.Generic;
+using Shomei.Infraestructure.Identity.Entities;
 
-namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
+namespace Shomei.Infraestructure.Identity.Features.UserSessions.Commands
 {
     /// <summary>
     /// Command to log out a session by its ID.
@@ -25,7 +26,7 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
 
         public async Task<GenericApiResponse<bool>> Handle(LogoutSessionByIdCommand request, CancellationToken cancellationToken)
         {
-            var identityResponse = await _identityContext.Set<Entities.UserSession>().FindAsync([request.Id], cancellationToken: cancellationToken);
+            var identityResponse = await _identityContext.Set<UserSession>().FindAsync([request.Id], cancellationToken: cancellationToken);
             if (identityResponse == null)
             {
                 return new GenericApiResponse<bool>
@@ -37,7 +38,7 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
                 };
             }
 
-            _identityContext.Set<Entities.UserSession>().Remove(identityResponse);
+            _identityContext.Set<UserSession>().Remove(identityResponse);
             await _identityContext.SaveChangesAsync(cancellationToken);
 
             return new GenericApiResponse<bool>
