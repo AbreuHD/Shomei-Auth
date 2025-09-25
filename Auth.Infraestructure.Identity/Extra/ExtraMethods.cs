@@ -84,7 +84,7 @@ namespace Auth.Infraestructure.Identity.Extra
             return Otp;
         }
 
-        internal static string HashToken(string token)
+        internal static string GetHash(string token)
         {
             var bytes = Encoding.UTF8.GetBytes(token);
             var hash = SHA256.HashData(bytes);
@@ -154,6 +154,17 @@ namespace Auth.Infraestructure.Identity.Extra
             );
 
             return jwtSecurityToken;
+        }
+
+        internal static string? GenerateRandomUsername(string name, string lastName)
+        {
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(lastName))
+                return null;
+            string cleanName = new([.. name.Where(char.IsLetterOrDigit)]);
+            string cleanLastName = new([.. lastName.Where(char.IsLetterOrDigit)]);
+            string baseUsername = $"{cleanName.FirstOrDefault()}{cleanLastName}".ToLower();
+            string randomDigits = RandomNumberGenerator.GetInt32(1000, 9999).ToString();
+            return $"{baseUsername}{randomDigits}";
         }
     }
 }

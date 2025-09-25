@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
@@ -22,42 +23,25 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
     public class SelectProfileQuery : IRequest<GenericApiResponse<AuthenticationResponse>>
     {
         /// <summary>
-        /// The data transfer object containing the profile selection information.
+        /// The ID of the profile to be selected.
         /// </summary>
-        /// <remarks>
-        /// This object holds the profile ID selected by the user for authentication and token generation.
-        /// </remarks>
-        public required SelectProfileRequestDto Dto { get; set; }
-
+        public required int ProfileId { get; set; }
         /// <summary>
-        /// The unique identifier of the user.
+        /// The password of the user profile.
         /// </summary>
         /// <remarks>
-        /// This is used to find the correct user profile and authenticate the user.
+        /// This field is optional. If provided, it can be used to select the profile.
         /// </remarks>
-        public required string UserId { get; set; }
-
-        /// <summary>
-        /// The user agent string from the device making the request.
-        /// </summary>
-        /// <remarks>
-        /// This is used for logging and tracking the user's session details.
-        /// </remarks>
-        public required string UserAgent { get; set; }
-
-        /// <summary>
-        /// The IP address of the device making the request.
-        /// </summary>
-        /// <remarks>
-        /// This is used for security purposes and logging the user's session.
-        /// </remarks>
-        public required string IpAdress { get; set; }
+        [RegularExpression(@"^\d{4}$", ErrorMessage = "La contraseña debe tener exactamente 4 dígitos numéricos.")]
+        public string? Password { get; set; }
     }
     internal class SelectProfileQueryHandler(UserManager<ApplicationUser> userManager,
         IConfiguration configuration,
-        IdentityContext identityContext) : IRequestHandler<SelectProfileQuery, GenericApiResponse<AuthenticationResponse>>
+        IdentityContext identityContext,
+        IHttpContextAccessor httpContextAccessor) : IRequestHandler<SelectProfileQuery, GenericApiResponse<AuthenticationResponse>>
     {
         private readonly IdentityContext _identityContext = identityContext;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly JwtSettings _jwtSettings
             = new()
@@ -71,6 +55,14 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
 
         public async Task<GenericApiResponse<AuthenticationResponse>> Handle(SelectProfileQuery request, CancellationToken cancellationToken)
         {
+            var user = _httpContextAccessor.HttpContext?.User;
+            var uidClaim = user?.FindFirst("uid")?.Value;
+            if (uidClaim == null)
+            {
+                return new GenericApiResponse<AuthenticationResponse> { Success = false, Message = "You are not logged", Statuscode = StatusCodes.Status400BadRequest };
+            }
+            var UserAgent = _httpContextAccessor.HttpContext!.Request.Headers.UserAgent.ToString() ?? "Unknown";
+            var IpAdress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
             var response = new GenericApiResponse<AuthenticationResponse>()
             {
                 Success = true,
@@ -79,39 +71,62 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
             };
             try
             {
-                var profileResponse = await _identityContext.Set<Entities.UserProfile>().FindAsync([request.Dto.Profile], cancellationToken: cancellationToken);
+                var profileResponse = await _identityContext.Set<Entities.UserProfile>().FindAsync([request.ProfileId], cancellationToken: cancellationToken);
                 if (profileResponse is null)
                 {
                     return new GenericApiResponse<AuthenticationResponse>
                     {
                         Success = false,
-                        Message = $"No Profile Register with {request.Dto.Profile}",
+                        Message = $"No Profile Register with {request.ProfileId}",
                         Statuscode = StatusCodes.Status500InternalServerError
                     };
                 }
-                if (profileResponse.UserId != request.UserId)
+                if (profileResponse.UserId != uidClaim)
                 {
                     return new GenericApiResponse<AuthenticationResponse>
                     {
                         Success = false,
-                        Message = $"Profile {request.Dto.Profile} does not belong to {request.UserId}",
+                        Message = $"Profile {request.ProfileId} does not belong to {uidClaim}",
                         Statuscode = StatusCodes.Status401Unauthorized
                     };
                 }
-                var userResponse = await _userManager.FindByIdAsync(request.UserId ?? String.Empty);
+                var userResponse = await _userManager.FindByIdAsync(uidClaim);
                 if (userResponse is null)
                 {
                     return new GenericApiResponse<AuthenticationResponse>
                     {
                         Success = false,
-                        Message = $"No Account Register with {request.UserId}",
+                        Message = $"No Account Register with {uidClaim}",
                         Statuscode = StatusCodes.Status500InternalServerError,
                     };
                 }
+
+                if (profileResponse.Password != null && profileResponse.Password != string.Empty)
+                {
+                    if (request.Password == null)
+                    {
+                        return new GenericApiResponse<AuthenticationResponse>
+                        {
+                            Success = false,
+                            Message = "Password is required",
+                            Statuscode = StatusCodes.Status400BadRequest
+                        };
+                    }
+                    if (ExtraMethods.GetHash(request.Password.ToString()) != profileResponse.Password)
+                    {
+                        return new GenericApiResponse<AuthenticationResponse>
+                        {
+                            Success = false,
+                            Message = "Password is incorrect",
+                            Statuscode = StatusCodes.Status401Unauthorized
+                        };
+                    }
+                }
+
                 var userClaims = await _userManager.GetClaimsAsync(userResponse);
                 var roles = await _userManager.GetRolesAsync(userResponse);
 
-                JwtSecurityToken jwtSecurityToken = ExtraMethods.GenerateJWToken(userResponse, _jwtSettings, userClaims, roles, request.Dto.Profile);
+                JwtSecurityToken jwtSecurityToken = ExtraMethods.GenerateJWToken(userResponse, _jwtSettings, userClaims, roles, request.ProfileId);
                 var token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
                 response.Payload = new AuthenticationResponse
                 {
@@ -129,11 +144,11 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
                 var session = new UserSession
                 {
                     UserId = userResponse.Id,
-                    Token = ExtraMethods.HashToken(token),
+                    Token = ExtraMethods.GetHash(token),
                     Expiration = jwtSecurityToken.ValidTo,
                     CreatedAt = DateTime.UtcNow,
-                    IpAddress = request.IpAdress,
-                    UserAgent = request.UserAgent
+                    IpAddress = IpAdress,
+                    UserAgent = UserAgent
                 };
                 _identityContext.Set<UserSession>().Add(session);
                 await _identityContext.SaveChangesAsync(cancellationToken);

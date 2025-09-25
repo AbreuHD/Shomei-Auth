@@ -78,7 +78,7 @@ namespace Auth.Infraestructure.Identity.Middleware
 
         private static async Task<bool> IsValidSession(DbContext dbContext, string token, string userId)
         {
-            var tokenHased = ExtraMethods.HashToken(token);
+            var tokenHased = ExtraMethods.GetHash(token);
             var session = await dbContext.Set<UserSession>()
                 .FirstOrDefaultAsync(s => s.Token == tokenHased && s.UserId == userId);
 

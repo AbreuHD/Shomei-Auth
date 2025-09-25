@@ -19,5 +19,10 @@
         /// The URL of the profile's avatar image, if available.
         /// </summary>
         public string? AvatarUrl { get; set; }
+
+        /// <summary>
+        /// If the profile uses a password for authentication.
+        /// </summary>
+        public bool UsePassword { get; set; }
     }
 }

@@ -15,27 +15,22 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
     /// </remarks>
     public class GetProfilesQuery : IRequest<GenericApiResponse<List<GetProfilesResponse>>>
     {
-        /// <summary>
-        /// The unique identifier of the user whose profiles are being retrieved.
-        /// </summary>
-        /// <remarks>
-        /// The user ID is used to find all profiles linked to the specific user.
-        /// </remarks>
-        public required string UserId { get; set; }
     }
 
-    internal class GetProfilesQueryHandler(IdentityContext identityContext) : IRequestHandler<GetProfilesQuery, GenericApiResponse<List<GetProfilesResponse>>>
+    internal class GetProfilesQueryHandler(IdentityContext identityContext, IHttpContextAccessor httpContextAccessor) : IRequestHandler<GetProfilesQuery, GenericApiResponse<List<GetProfilesResponse>>>
     {
         private readonly IdentityContext _identityContext = identityContext;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         public async Task<GenericApiResponse<List<GetProfilesResponse>>> Handle(GetProfilesQuery request, CancellationToken cancellationToken)
         {
+            var UserId = _httpContextAccessor.HttpContext.User.FindFirst("uid")?.Value ?? "Unknown";
             var response = new GenericApiResponse<List<GetProfilesResponse>>()
             {
                 Success = false,
                 Statuscode = StatusCodes.Status500InternalServerError,
                 Message = "N/A"
             };
-            var profiles = await _identityContext.Set<Entities.UserProfile>().Where(x => x.UserId == request.UserId).ToListAsync();
+            var profiles = await _identityContext.Set<Entities.UserProfile>().Where(x => x.UserId == UserId).ToListAsync();
             if (profiles.Count == 0)
             {
                 response.Success = false;
@@ -50,7 +45,8 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
             {
                 Id = x.Id,
                 Name = x.Name,
-                AvatarUrl = x.AvatarUrl
+                AvatarUrl = x.AvatarUrl,
+                UsePassword = x.Password != null
             })];
             return response;
         }

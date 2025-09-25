@@ -4,7 +4,6 @@ using Auth.Infraestructure.Identity.Extra;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
 
 
 namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
@@ -18,18 +17,15 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
     /// </remarks>
     public class LogoutCurrentSessionCommand : IRequest<GenericApiResponse<bool>>
     {
-        /// <summary>
-        /// The token of the session to be logged out.
-        /// </summary>
-        public required string Token { get; set; }
     }
-    internal class LogoutCurrentSessionCommandHandler(IdentityContext identityContext) : IRequestHandler<LogoutCurrentSessionCommand, GenericApiResponse<bool>>
+    internal class LogoutCurrentSessionCommandHandler(IdentityContext identityContext, IHttpContextAccessor httpContextAccessor) : IRequestHandler<LogoutCurrentSessionCommand, GenericApiResponse<bool>>
     {
         private readonly IdentityContext _identityContext = identityContext;
-
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         public async Task<GenericApiResponse<bool>> Handle(LogoutCurrentSessionCommand request, CancellationToken cancellationToken)
         {
-            var hashedToken = ExtraMethods.HashToken(request.Token);
+            var Token = _httpContextAccessor.HttpContext.Request.Headers.Authorization.ToString().Split(" ")[1];
+            var hashedToken = ExtraMethods.GetHash(Token);
             var identityResponse = await _identityContext.Set<Entities.UserSession>().FirstOrDefaultAsync(x => x.Token == hashedToken, cancellationToken);
             if (identityResponse == null)
             {

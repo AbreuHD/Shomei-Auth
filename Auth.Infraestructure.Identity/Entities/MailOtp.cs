@@ -1,6 +1,4 @@
-﻿using Auth.Infraestructure.Identity.Enums;
-
-namespace Auth.Infraestructure.Identity.Entities
+﻿namespace Auth.Infraestructure.Identity.Entities
 {
     public class MailOtp
     {

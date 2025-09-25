@@ -1,7 +1,6 @@
 ﻿using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.DTOs.Mail;
-using Auth.Infraestructure.Identity.DTOs.Otp;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Enums;
 using Auth.Infraestructure.Identity.Extra;
@@ -15,23 +14,28 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands
 {
     public class RequestEmailChangeOtpCommand : IRequest<GenericApiResponse<bool>>
     {
-        public required EmailChangeOtpRequestDto Dto { get; set; }
-        public required string UserId { get; set; }
-        public required string IpAddress { get; set; }
-        public required string UserAgent { get; set; }
+        /// <summary>
+        /// Gets or sets the user's current password.
+        /// This is required to confirm the user's identity before changing the email.
+        /// </summary>
+        public required string Password { get; set; }
     }
     internal class RequestEmailChangeOtpCommandHandler(IdentityContext identityContext,
         UserManager<ApplicationUser> userManager,
         MailSettings mailSettings,
+        IHttpContextAccessor httpContextAccessor,
         IHttpClientFactory httpClientFactory) : IRequestHandler<RequestEmailChangeOtpCommand, GenericApiResponse<bool>>
     {
         private readonly IdentityContext _identityContext = identityContext;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly MailSettings _mailSettings = mailSettings;
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
-
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         public async Task<GenericApiResponse<bool>> Handle(RequestEmailChangeOtpCommand request, CancellationToken cancellationToken)
         {
+            var IpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            var UserAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString() ?? "Unknown";
+            var UserId = _httpContextAccessor.HttpContext?.User.FindFirst("uid")?.Value ?? "Unknown";
             var response = new GenericApiResponse<bool>()
             {
                 Payload = false,
@@ -41,14 +45,14 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands
             };
             try
             {
-                var user = await _userManager.FindByIdAsync(request.UserId);
+                var user = await _userManager.FindByIdAsync(UserId);
                 if (user == null)
                 {
                     response.Message = "User not found.";
                     response.Statuscode = StatusCodes.Status404NotFound;
                     return response;
                 }
-                var passwordCheck = await _userManager.CheckPasswordAsync(user, request.Dto.Password);
+                var passwordCheck = await _userManager.CheckPasswordAsync(user, request.Password);
                 if (!passwordCheck)
                 {
                     response.Message = "Password is incorrect";
@@ -60,22 +64,22 @@ namespace Auth.Infraestructure.Identity.Features.Email.Commands
                 _identityContext.Set<MailOtp>().Add(new MailOtp
                 {
                     UserId = user.Id,
-                    Otp = ExtraMethods.HashToken(Otp),
+                    Otp = ExtraMethods.GetHash(Otp),
                     Expiration = DateTime.UtcNow.AddMinutes(15),
-                    UserAgent = request.UserAgent,
-                    IpAddress = request.IpAddress,
+                    UserAgent = UserAgent,
+                    IpAddress = IpAddress,
                     Purpose = OtpPurpose.ChangeEmail.ToString()
                 });
                 await _identityContext.SaveChangesAsync(cancellationToken);
 
-                var geoInfo = await ExtraMethods.GetGeoLocationInfo(request.IpAddress, _httpClientFactory);
+                var geoInfo = await ExtraMethods.GetGeoLocationInfo(IpAddress, _httpClientFactory);
                 var passwordEmail = new PasswordResetEmail
                 {
                     UserName = user.UserName!,
                     OtpCode = Otp,
-                    Ip = request.IpAddress,
+                    Ip = IpAddress,
                     Country = geoInfo?.Country ?? "",
-                    UserAgent = request.UserAgent
+                    UserAgent = UserAgent
                 };
                 await ExtraMethods.SendEmail(_mailSettings, new SendEmailRequestDto
                 {

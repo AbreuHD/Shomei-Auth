@@ -1,20 +1,28 @@
-﻿using Auth.Infraestructure.Identity.DTOs.Account;
+﻿using Auth.Infraestructure.Identity.Context;
+using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Entities;
+using Auth.Infraestructure.Identity.Enums;
+using Auth.Infraestructure.Identity.Migrations;
+using Auth.Infraestructure.Identity.Otp;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 
-namespace Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail
+namespace Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmailWithOtp
 {
     /// <summary>
-    /// This class is used to authenticate and confirm a user's email by validating a confirmation token.
-    /// It handles the process of confirming the user's email address during the account activation process.
+    /// Command used to confirm a user's email by validating a One-Time Password (OTP).
     /// </summary>
-    public class AuthEmailCommand : IRequest<GenericApiResponse<string>>
+    public class AuthEmailWithOtpCommand : IRequest<GenericApiResponse<bool>>
     {
+        /// <summary>
+        /// The OTP code sent to the user that must be validated to confirm the email.
+        /// </summary>
+        public required string Otp { get; set; }
         /// <summary>
         /// The unique identifier of the user whose email is being confirmed.
         /// </summary>
@@ -22,22 +30,15 @@ namespace Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthE
         /// A string representing the user ID, which is required for email confirmation.
         /// </value>
         public required string UserId { get; set; }
-
-        /// <summary>
-        /// The confirmation token sent to the user for verifying their email address.
-        /// </summary>
-        /// <value>
-        /// A string representing the token that will be used to confirm the user's email.
-        /// </value>
-        public required string Token { get; set; }
     }
 
-    internal class AuthEmailCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<AuthEmailCommand, GenericApiResponse<string>>
+    internal class AuthEmailWithOtpCommandHandler(UserManager<ApplicationUser> userManager, IdentityContext identityContext) : IRequestHandler<AuthEmailWithOtpCommand, GenericApiResponse<bool>>
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
-        public async Task<GenericApiResponse<string>> Handle(AuthEmailCommand request, CancellationToken cancellationToken)
+        private readonly IdentityContext _identityContext = identityContext;
+        public async Task<GenericApiResponse<bool>> Handle(AuthEmailWithOtpCommand request, CancellationToken cancellationToken)
         {
-            var response = new GenericApiResponse<string>()
+            var response = new GenericApiResponse<bool>()
             {
                 Success = false,
                 Statuscode = StatusCodes.Status500InternalServerError,
@@ -50,20 +51,24 @@ namespace Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthE
                 {
                     response.Message = $"Not account registered with this user";
                     response.Statuscode = StatusCodes.Status404NotFound;
-                    response.Payload = "N/A";
+                    response.Payload = false;
                     response.Success = false;
                     return response;
                 }
 
-                request.Token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Token));
+                var otpCheckResponse = await ValidateOtpEmail.ValidateOtpWithEmail(response, request.Otp, user.Id, OtpPurpose.VerifyAccount.ToString(), _identityContext);
+                if (!otpCheckResponse.Success)
+                {
+                    return otpCheckResponse;
+                }
 
-                var result = await _userManager.ConfirmEmailAsync(user, request.Token);
-
+                var Token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var result = await _userManager.ConfirmEmailAsync(user, Token);
                 if (!result.Succeeded)
                 {
                     response.Message = $"An error occurred while confirming {user.Email}";
                     response.Statuscode = StatusCodes.Status400BadRequest;
-                    response.Payload = result.Errors.FirstOrDefault()!.Description ?? "ERROR";
+                    response.Payload = false;
                     response.Success = false;
                     return response;
                 }
@@ -71,13 +76,13 @@ namespace Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthE
                 response.Success = true;
                 response.Message = $"Account confirmed for {user.Email}. You can now use the App";
                 response.Statuscode = StatusCodes.Status200OK;
-                response.Payload = "OK";
+                response.Payload = true;
             }
             catch (Exception ex)
             {
-                response.Message = "An error occurred while confirming the account";
+                response.Message = $"An error occurred while confirming the account {ex.Message}";
                 response.Statuscode = StatusCodes.Status500InternalServerError;
-                response.Payload = ex.Message;
+                response.Payload = false;
                 response.Success = false;
             }
             return response;

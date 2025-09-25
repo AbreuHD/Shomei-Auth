@@ -36,7 +36,7 @@
         /// <value>
         /// A string representing the user's username.
         /// </value>
-        public required string UserName { get; set; }
+        public string? UserName { get; set; }
 
         /// <summary>
         /// The password chosen by the user to secure their account.
@@ -60,6 +60,6 @@
         /// <value>
         /// A string representing the user's phone number.
         /// </value>
-        public required string Phone { get; set; }
+        public string? Phone { get; set; }
     }
 }

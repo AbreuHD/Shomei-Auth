@@ -1,5 +1,4 @@
 ﻿using Auth.Infraestructure.Identity.DTOs.Generic;
-using Auth.Infraestructure.Identity.DTOs.UserName;
 using Auth.Infraestructure.Identity.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -14,22 +13,25 @@ namespace Auth.Infraestructure.Identity.Features.UserName.Commands
     public class ChangeUserNameCommand : IRequest<GenericApiResponse<bool>>
     {
         /// <summary>
-        /// Gets or sets the unique identifier of the user requesting the username change.
-        /// This ID is used to retrieve the user from the identity system.
+        /// Gets or sets the current password of the user.
+        /// This is required to verify the user's identity before allowing the username change.
         /// </summary>
-        public required string UserId { get; set; }
+        public required string Password { get; set; }
 
         /// <summary>
-        /// Gets or sets the data transfer object (DTO) containing the new username details.
+        /// Gets or sets the new username that the user wants to set.
+        /// Must meet the system's username validation requirements.
         /// </summary>
-        public required ChangeUserNameRequestDto Dto { get; set; }
+        public required string NewUserName { get; set; }
     }
-    internal class ChangeUserNameCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<ChangeUserNameCommand, GenericApiResponse<bool>>
+    internal class ChangeUserNameCommandHandler(UserManager<ApplicationUser> userManager, IHttpContextAccessor httpContextAccessor) : IRequestHandler<ChangeUserNameCommand, GenericApiResponse<bool>>
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         public async Task<GenericApiResponse<bool>> Handle(ChangeUserNameCommand request, CancellationToken cancellationToken)
         {
+            var UserId = _httpContextAccessor.HttpContext?.User.FindFirst("uid")?.Value ?? "Unknown";
             var response = new GenericApiResponse<bool>()
             {
                 Payload = false,
@@ -39,29 +41,29 @@ namespace Auth.Infraestructure.Identity.Features.UserName.Commands
             };
             try
             {
-                var user = await _userManager.FindByIdAsync(request.UserId);
+                var user = await _userManager.FindByIdAsync(UserId);
                 if (user == null)
                 {
                     response.Message = "User not found.";
                     response.Statuscode = StatusCodes.Status404NotFound;
                     return response;
                 }
-                var UserNameExist = await _userManager.FindByNameAsync(request.Dto.NewUserName);
+                var UserNameExist = await _userManager.FindByNameAsync(request.NewUserName);
                 if (UserNameExist != null)
                 {
                     response.Success = false;
-                    response.Message = $"Username {request.Dto.NewUserName} is already taken";
+                    response.Message = $"Username {request.NewUserName} is already taken";
                     response.Statuscode = StatusCodes.Status406NotAcceptable;
                     return response;
                 }
-                var passwordCheck = await _userManager.CheckPasswordAsync(user, request.Dto.Password);
+                var passwordCheck = await _userManager.CheckPasswordAsync(user, request.Password);
                 if (!passwordCheck)
                 {
                     response.Message = "Password is incorrect";
                     response.Statuscode = StatusCodes.Status406NotAcceptable;
                     return response;
                 }
-                var result = await _userManager.SetUserNameAsync(user, request.Dto.NewUserName);
+                var result = await _userManager.SetUserNameAsync(user, request.NewUserName);
                 if (result.Succeeded)
                 {
                     response.Payload = true;
