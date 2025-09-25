@@ -1,9 +1,7 @@
 using Auth.Infraestructure.Identity.DTOs.Account;
-using Auth.Infraestructure.Identity.DTOs.Email;
-using Auth.Infraestructure.Identity.DTOs.Otp;
-using Auth.Infraestructure.Identity.DTOs.Password;
-using Auth.Infraestructure.Identity.DTOs.UserName;
+using Auth.Infraestructure.Identity.Enums;
 using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmail;
+using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.AuthEmailWithOtp;
 using Auth.Infraestructure.Identity.Features.AuthenticateEmail.Command.GetDataFromJWT;
 using Auth.Infraestructure.Identity.Features.Email.Commands;
 using Auth.Infraestructure.Identity.Features.ForgotPSW.Commands;
@@ -33,14 +31,8 @@ namespace Auth.Testing.AuthAPI.Controllers
         public IMediator Mediator { get; } = mediator;
 
         [HttpPost("Login")]
-        public async Task<IActionResult> AuthLogin([FromBody] LoginRequestDto requestDto)
+        public async Task<IActionResult> AuthLogin([FromBody] AuthLoginQuery request)
         {
-            var request = new AuthLoginQuery
-            {
-                Dto = requestDto,
-                UserAgent = Request.Headers.UserAgent.ToString(),
-                IpAdress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown"
-            };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
         }
@@ -48,22 +40,24 @@ namespace Auth.Testing.AuthAPI.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterAccountRequestDto requestDto)
         {
-            var request = new CreateAccountCommand(Roles.User.ToString())
+            var request = new CreateAccountCommand(Roles.User.ToString(), VerificationMode.Otp, false)
             {
                 Dto = requestDto,
-                Origin = Request.Headers.Origin.ToString() ?? "Unknown"
             };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
         }
 
         [HttpGet("ConfirmEmail")]
-        public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailRequestDto requestDto)
+        public async Task<IActionResult> ConfirmEmail([FromQuery]AuthEmailCommand request)
         {
-            var request = new AuthEmailCommand
-            {
-                Dto = requestDto
-            };
+            var response = await Mediator.Send(request);
+            return StatusCode(response.Statuscode, response);
+        }
+
+        [HttpGet("ConfirmEmailWithOtp")]
+        public async Task<IActionResult> ConfirmEmailWithOtp([FromQuery]AuthEmailWithOtpCommand request)
+        {
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
         }
@@ -72,10 +66,9 @@ namespace Auth.Testing.AuthAPI.Controllers
         public async Task<IActionResult> ResentConfirmation([FromBody] SendValidationEmailAgainRequestDto requestDto)
         {
 
-            var request = new SendValidationEmailAgainCommand
+            var request = new SendValidationEmailAgainCommand(VerificationMode.Otp)
             {
                 Dto = requestDto,
-                Origin = Request.Headers.Origin.ToString() ?? "Unknown"
             };
             var response = await Mediator.Send(request);
             return Ok(response);
@@ -95,9 +88,9 @@ namespace Auth.Testing.AuthAPI.Controllers
 
         [HttpPost("SelectProfile")]
         [Authorize]
-        public async Task<IActionResult> SelectProfile([FromBody] SelectProfileQuery requestDto)
+        public async Task<IActionResult> SelectProfile([FromBody] SelectProfileQuery request)
         {
-            var response = await Mediator.Send(requestDto);
+            var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
         }
 
@@ -105,36 +98,30 @@ namespace Auth.Testing.AuthAPI.Controllers
         [Authorize]
         public async Task<IActionResult> GetAllProfiles()
         {
-            var response = await Mediator.Send(new GetProfilesQuery { UserId = User.FindFirst("uid")!.Value });
+            var response = await Mediator.Send(new GetProfilesQuery());
             return StatusCode(response.Statuscode, response);
         }
 
         [HttpPost("CreateUserProfileCommand")]
         [Authorize]
-        public async Task<IActionResult> CreateUserProfile(CreateUserProfileCommand requestDto)
+        public async Task<IActionResult> CreateUserProfile(CreateUserProfileCommand request)
         {
-            var response = await Mediator.Send(requestDto);
+            var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
         }
 
         [HttpDelete("DeleteUserProfileCommand")]
         [Authorize]
-        public async Task<IActionResult> DeleteUserProfile(int Id)
+        public async Task<IActionResult> DeleteUserProfile(DeleteUserProfileCommand request)
         {
-            var request = new DeleteUserProfileCommand() { Id = Id, UserId = User.FindFirst("uid")!.Value };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
         }
 
         [HttpPut("EditUserProfileCommand")]
         [Authorize]
-        public async Task<IActionResult> EditUserProfile(EditUserProfileRequestDto requestDto)
+        public async Task<IActionResult> EditUserProfile(EditUserProfileCommand request)
         {
-            var request = new EditUserProfileCommand()
-            {
-                Dto = requestDto,
-                UserId = User.FindFirst("uid")!.Value,
-            };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
         }
@@ -143,11 +130,7 @@ namespace Auth.Testing.AuthAPI.Controllers
         [MultipleSessionAuthorize]
         public async Task<IActionResult> LogoutFromAllSessions()
         {
-            var request = new LogoutAllSessionsCommand()
-            {
-                UserId = User.FindFirst("uid")!.Value,
-            };
-            var response = await Mediator.Send(request);
+            var response = await Mediator.Send(new LogoutAllSessionsCommand());
             return StatusCode(response.Statuscode, response);
         }
 
@@ -155,11 +138,7 @@ namespace Auth.Testing.AuthAPI.Controllers
         [MultipleSessionAuthorize]
         public async Task<IActionResult> LogoutCurrentSession()
         {
-            var request = new LogoutCurrentSessionCommand()
-            {
-                Token = Request.Headers.Authorization.ToString().Split(" ")[1],
-            };
-            var response = await Mediator.Send(request);
+            var response = await Mediator.Send(new LogoutCurrentSessionCommand());
             return StatusCode(response.Statuscode, response);
         }
 
@@ -175,86 +154,51 @@ namespace Auth.Testing.AuthAPI.Controllers
         [MultipleSessionAuthorize]
         public async Task<IActionResult> GetAllUserSessions()
         {
-            var request = new GetAllUserSessionsQuery()
-            {
-                UserId = User.FindFirst("uid")!.Value,
-            };
-            var response = await Mediator.Send(request);
+            var response = await Mediator.Send(new GetAllUserSessionsQuery());
             return StatusCode(response.Statuscode, response);
         }
 
         [HttpPut("ChangePassword")]
         [MultipleSessionAuthorize]
-        public async Task<IActionResult> ChangePassword(ChangePasswordDto requestDto)
+        public async Task<IActionResult> ChangePassword(ChangePasswordCommand request)
         {
-            var request = new ChangePasswordCommand()
-            {
-                Dto = requestDto,
-                UserId = User.FindFirst("uid")!.Value,
-                IpAdress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
-                UserAgent = Request.Headers.UserAgent.ToString()
-            };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
         }
 
         [HttpPut("ChangeUserName")]
         [MultipleSessionAuthorize]
-        public async Task<IActionResult> ChangeUserName(ChangeUserNameRequestDto requestDto)
+        public async Task<IActionResult> ChangeUserName(ChangeUserNameCommand request)
         {
-            var request = new ChangeUserNameCommand()
-            {
-                Dto = requestDto,
-                UserId = User.FindFirst("uid")!.Value,
-            };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
         }
 
         [HttpPut("ChangeEmail")]
         [Authorize]
-        public async Task<IActionResult> ChangeEmail(ChangeEmailRequestDto requestDto)
+        public async Task<IActionResult> ChangeEmail(ChangeEmailCommand request)
         {
-            var request = new ChangeEmailCommand()
-            {
-                Dto = requestDto,
-                UserId = User.FindFirst("uid")!.Value,
-            };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
         }
-
         [HttpPut("RequestEmailChangeOtp")]
         [Authorize]
-        public async Task<IActionResult> RequestEmailChangeOtp(EmailChangeOtpRequestDto requestDto)
+        public async Task<IActionResult> RequestEmailChangeOtp(RequestEmailChangeOtpCommand request)
         {
-            var request = new RequestEmailChangeOtpCommand()
-            {
-                Dto = requestDto,
-                UserId = User.FindFirst("uid")!.Value,
-                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
-                UserAgent = Request.Headers.UserAgent.ToString()
-            };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
         }
-
         [HttpPut("ChangeEmailWithOtp")]
         [Authorize]
-        public async Task<IActionResult> ChangeEmailWithOtp(ChangeEmailWithOtpRequestDto requestDto)
+        public async Task<IActionResult> ChangeEmailWithOtp(ChangeEmailWithOtpCommand request)
         {
-            var request = new ChangeEmailWithOtpCommand()
-            {
-                Dto = requestDto,
-                UserId = User.FindFirst("uid")!.Value,
-            };
             var response = await Mediator.Send(request);
             return StatusCode(response.Statuscode, response);
         }
 
         [HttpPut("GeneratePasswordResetOtp")]
         [Authorize]
-        public async Task<IActionResult> GeneratePasswordResetOtp([FromBody]string email)
+        public async Task<IActionResult> GeneratePasswordResetOtp([FromBody] string email)
         {
             var response = await Mediator.Send(new GeneratePasswordResetOtpCommand() { Email = email });
             return StatusCode(response.Statuscode, response);

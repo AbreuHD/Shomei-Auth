@@ -5,20 +5,12 @@ using Auth.Infraestructure.Identity.DTOs.Password;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Enums;
 using Auth.Infraestructure.Identity.Extra;
-using Auth.Infraestructure.Identity.Features.Email.Commands;
 using Auth.Infraestructure.Identity.Mails;
 using Auth.Infraestructure.Identity.Otp;
 using Auth.Infraestructure.Identity.Settings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Auth.Infraestructure.Identity.Features.ForgotPSW.Commands
 {

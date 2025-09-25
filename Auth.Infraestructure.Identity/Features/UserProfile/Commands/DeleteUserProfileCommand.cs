@@ -1,7 +1,9 @@
 ﻿using Auth.Infraestructure.Identity.Context;
 using Auth.Infraestructure.Identity.DTOs.Generic;
+using Auth.Infraestructure.Identity.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 
 namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
 {
@@ -23,31 +25,42 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
         public required int Id { get; set; }
 
         /// <summary>
-        /// The ID of the user attempting to delete the profile.
+        /// Gets or sets the user's current password.
         /// </summary>
         /// <remarks>
-        /// The UserId must match the owner of the profile being deleted. This is used for authorization checks.
+        /// This is required to validate the identity of the user before deleting the profile.
         /// </remarks>
-        public required string UserId { get; set; }
+        public required string Password { get; set; }
     }
-    public class DeleteUserProfileCommandHandler(IdentityContext context) : IRequestHandler<DeleteUserProfileCommand, GenericApiResponse<bool>>
+    public class DeleteUserProfileCommandHandler(IdentityContext context, IHttpContextAccessor httpContextAccessor, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager) : IRequestHandler<DeleteUserProfileCommand, GenericApiResponse<bool>>
     {
         private readonly IdentityContext _context = context;
-
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+        private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
+        private readonly UserManager<ApplicationUser> _userManager = userManager;
         public async Task<GenericApiResponse<bool>> Handle(DeleteUserProfileCommand request, CancellationToken cancellationToken)
         {
+            var UserId = _httpContextAccessor.HttpContext.User.FindFirst("uid")?.Value ?? "Unknown";
             var userProfile = await _context.Set<Entities.UserProfile>().FindAsync([request.Id], cancellationToken: cancellationToken);
+
+            var User = await _userManager.FindByIdAsync(UserId);
+
 
             if (userProfile is null)
             {
                 return new GenericApiResponse<bool> { Message = "User profile don't exist", Payload = false, Statuscode = StatusCodes.Status500InternalServerError, Success = false };
             }
-            if (userProfile.UserId != request.UserId)
+            if (userProfile.UserId != UserId)
             {
                 return new GenericApiResponse<bool> { Message = "You don't have permission to do that", Payload = false, Statuscode = StatusCodes.Status401Unauthorized, Success = false };
             }
+            var signInResult = await _signInManager.CheckPasswordSignInAsync(User, request.Password, false);
+            if (!signInResult.Succeeded)
+            {
+                return new GenericApiResponse<bool> { Message = "Invalid password", Payload = false, Statuscode = StatusCodes.Status401Unauthorized, Success = false };
+            }
             _context.Set<Entities.UserProfile>().Remove(userProfile);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
             return new GenericApiResponse<bool> { Message = "Deleted", Payload = true, Statuscode = StatusCodes.Status200OK, Success = true };
 
         }

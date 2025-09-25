@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
@@ -25,6 +26,14 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
         /// The ID of the profile to be selected.
         /// </summary>
         public required int ProfileId { get; set; }
+        /// <summary>
+        /// The password of the user profile.
+        /// </summary>
+        /// <remarks>
+        /// This field is optional. If provided, it can be used to select the profile.
+        /// </remarks>
+        [RegularExpression(@"^\d{4}$", ErrorMessage = "La contraseña debe tener exactamente 4 dígitos numéricos.")]
+        public string? Password { get; set; }
     }
     internal class SelectProfileQueryHandler(UserManager<ApplicationUser> userManager,
         IConfiguration configuration,
@@ -91,6 +100,29 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Queries
                         Statuscode = StatusCodes.Status500InternalServerError,
                     };
                 }
+
+                if (profileResponse.Password != null && profileResponse.Password != string.Empty)
+                {
+                    if (request.Password == null)
+                    {
+                        return new GenericApiResponse<AuthenticationResponse>
+                        {
+                            Success = false,
+                            Message = "Password is required",
+                            Statuscode = StatusCodes.Status400BadRequest
+                        };
+                    }
+                    if (ExtraMethods.GetHash(request.Password.ToString()) != profileResponse.Password)
+                    {
+                        return new GenericApiResponse<AuthenticationResponse>
+                        {
+                            Success = false,
+                            Message = "Password is incorrect",
+                            Statuscode = StatusCodes.Status401Unauthorized
+                        };
+                    }
+                }
+
                 var userClaims = await _userManager.GetClaimsAsync(userResponse);
                 var roles = await _userManager.GetRolesAsync(userResponse);
 

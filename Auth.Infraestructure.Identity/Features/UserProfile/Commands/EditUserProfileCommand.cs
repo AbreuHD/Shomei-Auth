@@ -1,5 +1,4 @@
 ﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -16,41 +15,49 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
     public class EditUserProfileCommand : IRequest<GenericApiResponse<bool>>
     {
         /// <summary>
-        /// The profile data that needs to be updated.
+        /// The unique identifier for the user profile being updated.
         /// </summary>
-        /// <see cref="EditUserProfileRequestDto"/>
         /// <remarks>
-        /// This object holds the updated values for the user's profile, such as their name and avatar URL.
+        /// This ID is used to locate the specific user profile that needs to be edited.
         /// </remarks>
-        public required EditUserProfileRequestDto Dto { get; set; }
+        public required int Id { get; set; }
 
         /// <summary>
-        /// The ID of the user whose profile is being edited.
+        /// The URL of the user's avatar image.
         /// </summary>
         /// <remarks>
-        /// This value must match the UserId of the profile being edited to ensure the correct user is making the request.
+        /// This field is optional, and it will update the user's avatar URL if provided.
         /// </remarks>
-        public required string UserId { get; set; }
+        public string? AvatarUrl { get; set; }
+
+        /// <summary>
+        /// The name of the user, typically their full name.
+        /// </summary>
+        /// <remarks>
+        /// This field is required and will update the user's name.
+        /// </remarks>
+        public required string Name { get; set; }
     }
 
-    internal class EditUserProfileCommandHandler(IdentityContext context) : IRequestHandler<EditUserProfileCommand, GenericApiResponse<bool>>
+    internal class EditUserProfileCommandHandler(IdentityContext context, IHttpContextAccessor httpContextAccessor) : IRequestHandler<EditUserProfileCommand, GenericApiResponse<bool>>
     {
         private readonly IdentityContext _context = context;
-
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         public async Task<GenericApiResponse<bool>> Handle(EditUserProfileCommand request, CancellationToken cancellationToken)
         {
+            var UserId = _httpContextAccessor.HttpContext.User.FindFirst("uid").Value;
             try
             {
-                var UserProfile = await _context.Set<Entities.UserProfile>().FindAsync([request.Dto.Id], cancellationToken: cancellationToken)
+                var UserProfile = await _context.Set<Entities.UserProfile>().FindAsync([request.Id], cancellationToken: cancellationToken)
                     ?? throw new NotImplementedException("This profile don't exist");
 
-                if (UserProfile.UserId != request.UserId)
+                if (UserProfile.UserId != UserId)
                 {
                     return new GenericApiResponse<bool> { Success = false, Message = "You User don't have permission to do that", Statuscode = StatusCodes.Status401Unauthorized, Payload = false };
                 }
 
-                UserProfile.AvatarUrl = request.Dto.AvatarUrl;
-                UserProfile.Name = request.Dto.Name;
+                UserProfile.AvatarUrl = request.AvatarUrl;
+                UserProfile.Name = request.Name;
                 _context.Set<Entities.UserProfile>().Update(UserProfile);
                 await _context.SaveChangesAsync(cancellationToken);
 

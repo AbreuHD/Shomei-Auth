@@ -5,13 +5,11 @@ using Auth.Infraestructure.Identity.DTOs.Mail;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
 using Auth.Infraestructure.Identity.Mails;
-using Auth.Infraestructure.Identity.Migrations;
 using Auth.Infraestructure.Identity.Settings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 
 
@@ -24,35 +22,37 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
     public class AuthLoginQuery : IRequest<GenericApiResponse<AuthenticationResponse>>
     {
         /// <summary>
-        /// The data transfer object (DTO) containing the username and password for user authentication.
+        /// The username of the user attempting to log in.
         /// </summary>
         /// <value>
-        /// A <see cref="LoginRequestDto"/> that holds the username and password for authentication.
+        /// A string representing the user's username.
         /// </value>
-        public required LoginRequestDto Dto { get; set; }
+        public string? UserName { get; set; }
 
         /// <summary>
-        /// The user agent string representing the client's browser or application information.
+        /// The Email of the user attempting to log in.
         /// </summary>
         /// <value>
-        /// A string representing the user agent.
+        /// A string representing the user's email.
         /// </value>
-        public required string UserAgent { get; set; }
+        public string? Email { get; set; }
 
         /// <summary>
-        /// The IP address of the client making the login request.
+        /// The password of the user attempting to log in.
         /// </summary>
         /// <value>
-        /// A string representing the IP address.
+        /// A string representing the user's password.
         /// </value>
-        public required string IpAdress { get; set; }
+        public required string Password { get; set; }
+
     }
 
-    internal class AuthLoginQueryHandler(UserManager<ApplicationUser> userManager, 
-        SignInManager<ApplicationUser> signInManager, 
-        IConfiguration configuration, 
+    internal class AuthLoginQueryHandler(UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        IConfiguration configuration,
         IdentityContext identityContext,
         IHttpClientFactory _httpClientFactory,
+        IHttpContextAccessor httpContextAccessor,
         MailSettings _mailSettings)
 
         : IRequestHandler<AuthLoginQuery, GenericApiResponse<AuthenticationResponse>>
@@ -60,6 +60,7 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
         private readonly IdentityContext _identityContext = identityContext;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         private readonly JwtSettings _jwtSettings
             = new()
@@ -75,38 +76,48 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
 
         public async Task<GenericApiResponse<AuthenticationResponse>> Handle(AuthLoginQuery request, CancellationToken cancellationToken)
         {
+            var UserAgent = _httpContextAccessor.HttpContext!.Request.Headers.UserAgent.ToString() ?? "Unknown";
+            var IpAdress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+
+            if (string.IsNullOrEmpty(request.Email) && string.IsNullOrEmpty(request.UserName))
+            {
+                return new GenericApiResponse<AuthenticationResponse>()
+                {
+                    Message = "You need to complete all the values",
+                    Statuscode = StatusCodes.Status500InternalServerError,
+                    Success = false
+                };
+            }
+
             var response = new GenericApiResponse<AuthenticationResponse>()
             {
                 Message = "Logged",
                 Statuscode = StatusCodes.Status200OK,
                 Success = true,
-                Payload = new AuthenticationResponse()
-                {
-                    Id = string.Empty,
-                    Name = string.Empty,
-                    LastName = string.Empty,
-                    UserName = string.Empty,
-                    Email = string.Empty,
-                    Roles = [],
-                    IsVerified = false,
-                    JWToken = string.Empty,
-                    RefreshToken = string.Empty,
-                }
             };
 
             try
             {
-                var User = await _userManager.FindByNameAsync(request.Dto.UserName);
+                ApplicationUser User;
+                if (!string.IsNullOrEmpty(request.Email))
+                {
+                    User = await _userManager.FindByEmailAsync(request.Email);
+                }
+                else
+                {
+                    User = await _userManager.FindByNameAsync(request.UserName);
+                }
+
                 if (User == null)
                 {
                     response.Success = false;
-                    response.Message = $"No Account Register with {request.Dto.UserName}";
+                    response.Message = $"No Account Register with {request.UserName}";
                     response.Statuscode = StatusCodes.Status404NotFound;
                     return response;
                 }
                 bool isFinalAttempt = User.AccessFailedCount == (_jwtSettings.MaxFailedAccessAttempts - 1);
 
-                var result = await _signInManager.PasswordSignInAsync(User.UserName!, request.Dto.Password, false, lockoutOnFailure: true);
+                var result = await _signInManager.PasswordSignInAsync(User.UserName!, request.Password, false, lockoutOnFailure: true);
 
                 if (User.IsBanned == true)
                 {
@@ -121,9 +132,9 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
                     var blockEmail = new AccountLockEmail()
                     {
                         UserName = User.UserName!,
-                        Ip = request.IpAdress,
-                        Country = (await ExtraMethods.GetGeoLocationInfo(request.IpAdress, _httpClientFactory))?.Country ?? "Unknown",
-                        UserAgent = request.UserAgent,
+                        Ip = IpAdress,
+                        Country = (await ExtraMethods.GetGeoLocationInfo(IpAdress, _httpClientFactory))?.Country ?? "Unknown",
+                        UserAgent = UserAgent,
                         LockDuration = $"{_jwtSettings.DefaultLockoutTimeSpan} minutes"
                     };
 
@@ -163,7 +174,7 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
                 if (!User.EmailConfirmed)
                 {
                     response.Success = false;
-                    response.Message = $"Account not confirm for {request.Dto.UserName}";
+                    response.Message = $"Account not confirm for {request.UserName}";
                     response.Statuscode = StatusCodes.Status400BadRequest;
                     return response;
                 }
@@ -180,8 +191,8 @@ namespace Auth.Infraestructure.Identity.Features.Login.Queries.AuthLogin
                         UserId = User.Id,
                         Token = ExtraMethods.GetHash(token),
                         Expiration = jwtSecurityToken.ValidTo,
-                        IpAddress = request.IpAdress,
-                        UserAgent = request.UserAgent,
+                        IpAddress = IpAdress,
+                        UserAgent = UserAgent,
                         CreatedAt = DateTime.UtcNow
                     };
 

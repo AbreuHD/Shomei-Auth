@@ -155,5 +155,16 @@ namespace Auth.Infraestructure.Identity.Extra
 
             return jwtSecurityToken;
         }
+
+        internal static string? GenerateRandomUsername(string name, string lastName)
+        {
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(lastName))
+                return null;
+            string cleanName = new([.. name.Where(char.IsLetterOrDigit)]);
+            string cleanLastName = new([.. lastName.Where(char.IsLetterOrDigit)]);
+            string baseUsername = $"{cleanName.FirstOrDefault()}{cleanLastName}".ToLower();
+            string randomDigits = RandomNumberGenerator.GetInt32(1000, 9999).ToString();
+            return $"{baseUsername}{randomDigits}";
+        }
     }
 }

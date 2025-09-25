@@ -18,22 +18,20 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Queries
     /// </remarks>
     public class GetAllUserSessionsQuery : IRequest<GenericApiResponse<List<UserSessionResponse>>>
     {
-        /// <summary>
-        /// The ID of the user for whom the sessions are to be retrieved.
-        /// </summary>
-        public required string UserId { get; set; }
     }
-    internal class GetAllUserSessionsQueryHandler(IdentityContext identityContext, IHttpClientFactory httpClientFactory) : IRequestHandler<GetAllUserSessionsQuery, GenericApiResponse<List<UserSessionResponse>>>
+    internal class GetAllUserSessionsQueryHandler(IdentityContext identityContext, IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor) : IRequestHandler<GetAllUserSessionsQuery, GenericApiResponse<List<UserSessionResponse>>>
     {
         private readonly IdentityContext _identityContext = identityContext;
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         public async Task<GenericApiResponse<List<UserSessionResponse>>> Handle(GetAllUserSessionsQuery request, CancellationToken cancellationToken)
         {
+            var UserId = _httpContextAccessor.HttpContext.User.FindFirst("uid").Value;
             try
             {
                 var userSessions = await _identityContext.Set<UserSession>()
-                    .Where(x => x.UserId == request.UserId)
+                    .Where(x => x.UserId == UserId)
                     .Select(x => new UserSessionResponse
                     {
                         Id = x.Id,

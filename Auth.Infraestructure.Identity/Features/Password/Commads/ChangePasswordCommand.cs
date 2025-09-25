@@ -1,6 +1,5 @@
 ﻿using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.DTOs.Mail;
-using Auth.Infraestructure.Identity.DTOs.Password;
 using Auth.Infraestructure.Identity.Entities;
 using Auth.Infraestructure.Identity.Extra;
 using Auth.Infraestructure.Identity.Mails;
@@ -18,44 +17,38 @@ namespace Auth.Infraestructure.Identity.Features.Password.Commads
     public class ChangePasswordCommand : IRequest<GenericApiResponse<bool>>
     {
         /// <summary>
-        /// Gets or sets the data transfer object (DTO) containing the required information 
-        /// for changing the password, including the current and new passwords.
+        /// Gets or sets the current password of the user.
+        /// This is required to verify the user's identity before changing the password.
         /// </summary>
-        public required ChangePasswordDto Dto { get; set; }
+        public required string CurrentPassword { get; set; }
 
         /// <summary>
-        /// Gets or sets the unique identifier of the user requesting the password change.
-        /// This ID is used to fetch the user from the identity system.
+        /// Gets or sets the new password that the user wants to set.
+        /// Must meet the system's password security requirements.
         /// </summary>
-        public required string UserId { get; set; }
+        public required string NewPassword { get; set; }
 
         /// <summary>
-        /// The user agent string representing the client's browser or application information.
+        /// Gets or sets the repeated entry of the new password.
+        /// Used to confirm that the user has entered the intended new password correctly.
         /// </summary>
-        /// <value>
-        /// A string representing the user agent.
-        /// </value>
-        public string? UserAgent { get; set; }
-
-        /// <summary>
-        /// The IP address of the client making the login request.
-        /// </summary>
-        /// <value>
-        /// A string representing the IP address.
-        /// </value>
-        public string? IpAdress { get; set; }
+        public required string RepeatNewPassword { get; set; }
     }
     internal class ChangePasswordCommandHandler(UserManager<ApplicationUser> userManager,
             MailSettings mailSettings,
-            IHttpClientFactory httpClientFactory
+            IHttpClientFactory httpClientFactory,
+            IHttpContextAccessor httpContextAccessor
         ) : IRequestHandler<ChangePasswordCommand, GenericApiResponse<bool>>
     {
         private readonly MailSettings _mailSettings = mailSettings;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
-
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         public async Task<GenericApiResponse<bool>> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
         {
+            var IpAdress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            var UserAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString() ?? "Unknown";
+            var UserId = _httpContextAccessor.HttpContext?.User.FindFirst("uid")?.Value ?? "Unknown";
             var response = new GenericApiResponse<bool>()
             {
                 Payload = false,
@@ -64,7 +57,7 @@ namespace Auth.Infraestructure.Identity.Features.Password.Commads
                 Message = ""
             };
 
-            var user = await _userManager.FindByIdAsync(request.UserId);
+            var user = await _userManager.FindByIdAsync(UserId);
             if (user == null)
             {
                 response.Message = "User not found";
@@ -72,14 +65,14 @@ namespace Auth.Infraestructure.Identity.Features.Password.Commads
                 return response;
             }
 
-            if (request.Dto.NewPassword != request.Dto.RepeatNewPassword)
+            if (request.NewPassword != request.RepeatNewPassword)
             {
                 response.Message = "Passwords do not match";
                 response.Statuscode = StatusCodes.Status406NotAcceptable;
                 return response;
             }
 
-            var passwordCheck = await _userManager.CheckPasswordAsync(user, request.Dto.CurrentPassword);
+            var passwordCheck = await _userManager.CheckPasswordAsync(user, request.CurrentPassword);
             if (!passwordCheck)
             {
                 response.Message = "Current password is incorrect";
@@ -87,13 +80,13 @@ namespace Auth.Infraestructure.Identity.Features.Password.Commads
                 return response;
             }
 
-            if (request.Dto.NewPassword == request.Dto.CurrentPassword)
+            if (request.NewPassword == request.CurrentPassword)
             {
                 response.Message = "New password cannot be the same as the current password";
                 response.Statuscode = StatusCodes.Status406NotAcceptable;
                 return response;
             }
-            var result = await _userManager.ChangePasswordAsync(user, request.Dto.CurrentPassword, request.Dto.NewPassword);
+            var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
 
             if (result.Succeeded)
             {
@@ -102,17 +95,16 @@ namespace Auth.Infraestructure.Identity.Features.Password.Commads
                 response.Statuscode = StatusCodes.Status200OK;
                 response.Message = "Password changed successfully";
 
-                if (request.UserAgent != null && request.IpAdress != null)
+                if (UserAgent != null && IpAdress != null)
                 {
-                    var geoInfo = await ExtraMethods.GetGeoLocationInfo(request.IpAdress, _httpClientFactory);
+                    var geoInfo = await ExtraMethods.GetGeoLocationInfo(IpAdress, _httpClientFactory);
                     await ExtraMethods.SendEmail(_mailSettings, new SendEmailRequestDto
                     {
                         To = user.Email!,
-                        Body = ChangePasswordMail.GetEmailHtml(request.IpAdress, geoInfo?.Country ?? "", request.UserAgent),
+                        Body = ChangePasswordMail.GetEmailHtml(IpAdress, geoInfo?.Country ?? "", UserAgent),
                         Subject = "Password Changed"
                     });
                 }
-
             }
             else
             {

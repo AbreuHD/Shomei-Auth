@@ -14,18 +14,16 @@ namespace Auth.Infraestructure.Identity.Features.UserSessions.Commands
     /// </remarks>
     public class LogoutAllSessionsCommand : IRequest<GenericApiResponse<bool>>
     {
-        /// <summary>
-        /// The unique identifier of the user whose sessions will be logged out.
-        /// </summary>
-        public required string UserId { get; set; }
     }
-    internal class LogoutAllSessionsCommandHandler(IdentityContext identityContext) : IRequestHandler<LogoutAllSessionsCommand, GenericApiResponse<bool>>
+    internal class LogoutAllSessionsCommandHandler(IdentityContext identityContext, IHttpContextAccessor httpContextAccessor) : IRequestHandler<LogoutAllSessionsCommand, GenericApiResponse<bool>>
     {
         private readonly IdentityContext _identityContext = identityContext;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         public async Task<GenericApiResponse<bool>> Handle(LogoutAllSessionsCommand request, CancellationToken cancellationToken)
         {
-            var identityResponse = _identityContext.Set<Entities.UserSession>().Where(x => x.UserId == request.UserId);
+            var UserId = _httpContextAccessor.HttpContext.User.FindFirst("uid").Value;
+            var identityResponse = _identityContext.Set<Entities.UserSession>().Where(x => x.UserId == UserId);
             if (identityResponse == null)
             {
                 return new GenericApiResponse<bool>

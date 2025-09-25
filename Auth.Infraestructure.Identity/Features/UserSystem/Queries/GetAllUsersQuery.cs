@@ -46,7 +46,8 @@ namespace Auth.Infraestructure.Identity.Features.UserSystem.Queries
                         isBanned = user.IsBanned ?? false
                     });
                 }
-            }catch (Exception e)
+            }
+            catch (Exception e)
             {
                 response.Success = false;
                 response.Statuscode = 500;

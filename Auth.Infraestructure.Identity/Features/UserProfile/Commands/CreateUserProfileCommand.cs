@@ -1,9 +1,10 @@
 ﻿using Auth.Infraestructure.Identity.Context;
-using Auth.Infraestructure.Identity.DTOs.Account;
 using Auth.Infraestructure.Identity.DTOs.Generic;
 using Auth.Infraestructure.Identity.Extra;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
 {
@@ -40,6 +41,7 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
         /// This field is optional. If provided, it can be used to set or update the user's password.
         /// If not provided, the profile not use password.
         /// </remarks>
+        [RegularExpression(@"^\d{4}$", ErrorMessage = "La contraseña debe tener exactamente 4 dígitos numéricos.")]
         public string? Password { get; set; }
     }
     internal class CreateUserProfileCommandHandler(IdentityContext context, IHttpContextAccessor httpContextAccessor) : IRequestHandler<CreateUserProfileCommand, GenericApiResponse<bool>>
@@ -54,15 +56,22 @@ namespace Auth.Infraestructure.Identity.Features.UserProfile.Commands
             {
                 return new GenericApiResponse<bool> { Success = false, Message = "You are not logged", Statuscode = StatusCodes.Status400BadRequest, Payload = false };
             }
-
             try
             {
-                var existingProfile = await _context.Set<Entities.UserProfile>().FindAsync([uidClaim], cancellationToken);
+                var existingProfile = await _context.Set<Entities.UserProfile>()
+                    .FirstOrDefaultAsync(x => x.Name.ToLower() == request.Name.ToLower(), cancellationToken);
                 if (existingProfile != null)
                 {
-                    return new GenericApiResponse<bool> { Success = false, Message = "Profile Already Exists", Statuscode = StatusCodes.Status400BadRequest, Payload = false };
+                    return new GenericApiResponse<bool> { Success = false, Message = "User Already Exists", Statuscode = StatusCodes.Status400BadRequest, Payload = false };
                 }
-                request.Password = request.Password == null ? null : ExtraMethods.GetHash(request.Password);
+                if (string.IsNullOrEmpty(request.Password))
+                {
+                    request.Password = null;
+                }
+                else
+                {
+                    request.Password = ExtraMethods.GetHash(request.Password);
+                }
                 var profile = new Entities.UserProfile { UserId = uidClaim, Name = request.Name, AvatarUrl = request.AvatarUrl, Password = request.Password };
                 await _context.Set<Entities.UserProfile>().AddAsync(profile, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);

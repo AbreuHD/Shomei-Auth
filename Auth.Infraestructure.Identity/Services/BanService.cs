@@ -2,8 +2,6 @@
 using Auth.Infraestructure.Identity.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Threading.Tasks;
 
 namespace Auth.Infraestructure.Identity.Services
 {
