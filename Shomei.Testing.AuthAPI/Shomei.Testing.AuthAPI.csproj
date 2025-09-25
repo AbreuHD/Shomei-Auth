@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Auth.Infraestructure.Identity\Shomei.Infraestructure.Identity.csproj" />
+    <ProjectReference Include="..\Shomei.Infraestructure.Identity\Shomei.Infraestructure.Identity.csproj" />
   </ItemGroup>
 
 </Project>
