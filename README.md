@@ -1,7 +1,7 @@
-﻿[![Quality Gate Status](https://sonarq.abreuhd.com/api/project_badges/measure?project=Auth&metric=alert_status&token=sqb_d7c96802205a85dff2eb2159c2a338f4f5f7565a)](https://sonarq.abreuhd.com/dashboard?id=Auth) 
-[![Lines of Code](https://sonarq.abreuhd.com/api/project_badges/measure?project=Auth&metric=ncloc&token=sqb_d7c96802205a85dff2eb2159c2a338f4f5f7565a)](https://sonarq.abreuhd.com/dashboard?id=Auth)
-[![Maintainability Rating](https://sonarq.abreuhd.com/api/project_badges/measure?project=Auth&metric=software_quality_maintainability_rating&token=sqb_d7c96802205a85dff2eb2159c2a338f4f5f7565a)](https://sonarq.abreuhd.com/dashboard?id=Auth)
-[![Security Rating](https://sonarq.abreuhd.com/api/project_badges/measure?project=Auth&metric=software_quality_security_rating&token=sqb_d7c96802205a85dff2eb2159c2a338f4f5f7565a)](https://sonarq.abreuhd.com/dashboard?id=Auth)
+﻿[![Quality Gate Status](https://sonarq.abreuhd.com/api/project_badges/measure?project=Shomei&metric=alert_status&token=sqb_11c29e5afb868dc7a73fc8823d3c50da3497b747)](https://sonarq.abreuhd.com/dashboard?id=Auth) 
+[![Lines of Code](https://sonarq.abreuhd.com/api/project_badges/measure?project=Shomei&metric=ncloc&token=sqb_11c29e5afb868dc7a73fc8823d3c50da3497b747)](https://sonarq.abreuhd.com/dashboard?id=Auth)
+[![Maintainability Rating](https://sonarq.abreuhd.com/api/project_badges/measure?project=Shomei&metric=software_quality_maintainability_rating&token=sqb_11c29e5afb868dc7a73fc8823d3c50da3497b747)](https://sonarq.abreuhd.com/dashboard?id=Auth)
+[![Security Rating](https://sonarq.abreuhd.com/api/project_badges/measure?project=Shomei&metric=software_quality_security_rating&token=sqb_11c29e5afb868dc7a73fc8823d3c50da3497b747)](https://sonarq.abreuhd.com/dashboard?id=Auth)
 
 ### **Shōmei - Fast and Secure Authentication System**  
 
