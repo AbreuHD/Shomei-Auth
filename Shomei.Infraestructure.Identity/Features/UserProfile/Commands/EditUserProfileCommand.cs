@@ -20,7 +20,7 @@ namespace Shomei.Infraestructure.Identity.Features.UserProfile.Commands
         /// <remarks>
         /// This ID is used to locate the specific user profile that needs to be edited.
         /// </remarks>
-        public required int Id { get; set; }
+        public int? Id { get; set; }
 
         /// <summary>
         /// The URL of the user's avatar image.

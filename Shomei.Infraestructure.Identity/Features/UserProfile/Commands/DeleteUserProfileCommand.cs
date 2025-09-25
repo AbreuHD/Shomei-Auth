@@ -22,7 +22,7 @@ namespace Shomei.Infraestructure.Identity.Features.UserProfile.Commands
         /// <remarks>
         /// The ID is used to locate the specific user profile in the database.
         /// </remarks>
-        public required int Id { get; set; }
+        public int? Id { get; set; }
 
         /// <summary>
         /// Gets or sets the user's current password.
